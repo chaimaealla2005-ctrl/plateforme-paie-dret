@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block titre %}Statistiques RH{% endblock %}
+{% block contenu %}
+
+<div class="page-header">
+    <div>
+        <h1>Tableau de bord RH</h1>
+        <p class="sous-titre">Statistiques des employés</p>
+    </div>
+    <a href="{{ url_for('employe.nouvel_employe') }}" class="btn btn-success">+ Nouvel employé</a>
+</div>
+
+<div class="stats-mini">
+    <div class="stat-item">
+        <div class="stat-nb">{{ total_employes }}</div>
+        <div class="stat-label">Employés actifs</div>
+    </div>
+    <div class="stat-item stat-inactif">
+        <div class="stat-nb">{{ total_inactifs }}</div>
+        <div class="stat-label">Employés inactifs</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-nb">{{ anciennete_moyenne }} ans</div>
+        <div class="stat-label">Ancienneté moyenne</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-nb">{{ postes|length }}</div>
+        <div class="stat-label">Postes différents</div>
+    </div>
+</div>
+
+<!-- Répartition par poste -->
+<div class="card">
+    <div class="card-header">
+        <h2>Répartition par poste</h2>
+    </div>
+    {% if postes %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Poste</th>
+                    <th>Nombre d'employés</th>
+                    <th>%</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in postes %}
+                <tr>
+                    <td>{{ p.poste }}</td>
+                    <td>{{ p.n }}</td>
+                    <td>{{ "%.0f"|format(p.n / total_employes * 100) }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="text-align:center;padding:20px;color:#999;">Aucun poste renseigné.</p>
+    {% endif %}
+</div>
+
+<!-- Derniers employés embauchés -->
+<div class="card">
+    <div class="card-header">
+        <h2>Derniers employés embauchés</h2>
+        <a href="{{ url_for('employe.liste_employes') }}" class="btn btn-petit btn-modifier">Voir tout</a>
+    </div>
+    {% if derniers_embauches %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Matricule</th>
+                    <th>Nom</th>
+                    <th>Poste</th>
+                    <th>Date embauche</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for e in derniers_embauches %}
+                <tr>
+                    <td>{{ e.matricule }}</td>
+                    <td>{{ e.prenom }} {{ e.nom }}</td>
+                    <td>{{ e.poste or '-' }}</td>
+                    <td>{{ e.date_embauche if e.date_embauche else '-' }}</td>
+                    <td>
+                        <a href="{{ url_for('employe.modifier_employe', id_employe=e.id_employe) }}" class="btn btn-petit btn-modifier">Modifier</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="text-align:center;padding:20px;color:#999;">Aucun employé pour le moment.</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2>Actions rapides</h2>
+    </div>
+    <div class="actions-rapides">
+        <a href="{{ url_for('employe.nouvel_employe') }}" class="btn btn-success">+ Ajouter un employé</a>
+        <a href="{{ url_for('employe.liste_employes') }}" class="btn btn-primary">Voir tous les employés</a>
+        <a href="{{ url_for('conge.gerer_conges') }}" class="btn btn-info">Gérer les congés</a>
+    </div>
+</div>
+
+{% endblock %}

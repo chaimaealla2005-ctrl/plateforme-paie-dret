@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% block titre %}Paramétrage global{% endblock %}
+{% block contenu %}
+
+<div class="entete-liste">
+    <div>
+        <h1>Paramétrage global</h1>
+        <p class="sous-titre">Configuration des règles légales applicables à toutes les sociétés</p>
+    </div>
+</div>
+
+<!-- Message d'information -->
+<div class="info-banner">
+    <span class="info-icon">i</span>
+    <span>Les valeurs ci-dessous s'appliquent par défaut à toutes les sociétés. Chaque société peut les personnaliser.</span>
+</div>
+
+<!-- ============================================ -->
+<!-- SECTION 1 : COTISATIONS SOCIALES -->
+<!-- ============================================ -->
+<div class="carte-parametrage">
+    <div class="carte-header">
+        <h2>Cotisations sociales</h2>
+        <span class="badge badge-legal">Modifiable</span>
+    </div>
+    <div class="table-wrapper">
+        <table class="table-parametres">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Libellé</th>
+                    <th>Taux salarié (%)</th>
+                    <th>Taux patronal (%)</th>
+                    <th>Plafond mensuel (MAD)</th>
+                    <th>Année</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in baremes %}
+                <tr>
+                    <td><strong>{{ b.code }}</strong></td>
+                    <td>{{ b.libelle }}</td>
+                    <td>
+                        <form method="post" action="{{ url_for('parametrage.modifier_bareme', id_bareme=b.id_bareme) }}" class="form-inline">
+                            <input type="number" step="0.01" name="taux_salarial" value="{{ b.taux_salarial }}" class="input-petit">
+                            <button type="submit" class="btn-save">✓</button>
+                        </form>
+                    </td>
+                    <td>
+                        <form method="post" action="{{ url_for('parametrage.modifier_bareme', id_bareme=b.id_bareme) }}" class="form-inline">
+                            <input type="number" step="0.01" name="taux_patronal" value="{{ b.taux_patronal if b.taux_patronal else '' }}" class="input-petit" placeholder="—">
+                            <button type="submit" class="btn-save">✓</button>
+                        </form>
+                    </td>
+                    <td>
+                        <form method="post" action="{{ url_for('parametrage.modifier_bareme', id_bareme=b.id_bareme) }}" class="form-inline">
+                            <input type="number" step="0.01" name="plafond_mensuel" value="{{ b.plafond_mensuel if b.plafond_mensuel else '' }}" class="input-petit" placeholder="Illimité">
+                            <button type="submit" class="btn-save">✓</button>
+                        </form>
+                    </td>
+                    <td>{{ b.annee_application }}</td>
+                    <td class="text-center">
+                        <a href="{{ url_for('parametrage.modifier_bareme_page', id_bareme=b.id_bareme) }}" class="btn-action btn-modifier">
+                            <span class="action-icon">✎</span> Modifier
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- SECTION 2 : TRANCHES IR -->
+<!-- ============================================ -->
+<div class="carte-parametrage">
+    <div class="carte-header">
+        <h2>Barème de l'Impôt sur le Revenu (IR)</h2>
+        <span class="badge badge-legal">Modifiable</span>
+    </div>
+    <div class="table-wrapper">
+        <table class="table-parametres">
+            <thead>
+                <tr>
+                    <th>Seuil bas (MAD)</th>
+                    <th>Seuil haut (MAD)</th>
+                    <th>Taux (%)</th>
+                    <th>Somme à déduire (MAD)</th>
+                    <th>Année</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tranches %}
+                <tr>
+                    <td>{{ t.seuil_bas }}</td>
+                    <td>{{ t.seuil_haut if t.seuil_haut else 'Illimité' }}</td>
+                    <td>{{ t.taux }} %</td>
+                    <td>{{ t.somme_a_deduire }}</td>
+                    <td>{{ t.annee_application }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="carte-footer">
+            <a href="{{ url_for('parametrage.modifier_tranches_ir') }}" class="btn-action btn-modifier">
+                <span class="action-icon">✎</span> Modifier les tranches IR
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- SECTION 3 : PARAMETRES LEGAUX -->
+<!-- ============================================ -->
+<div class="carte-parametrage">
+    <div class="carte-header">
+        <h2>Paramètres légaux</h2>
+        <span class="badge badge-legal">Modifiable</span>
+    </div>
+    <div class="table-wrapper">
+        <table class="table-parametres">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Libellé</th>
+                    <th>Valeur</th>
+                    <th>Unité</th>
+                    <th>Année</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in parametres %}
+                <tr>
+                    <td><strong>{{ p.code }}</strong></td>
+                    <td>{{ p.libelle }}</td>
+                    <td>
+                        <form method="post" action="{{ url_for('parametrage.modifier_parametre', id_parametre=p.id_parametre) }}" class="form-inline">
+                            <input type="number" step="0.01" name="valeur" value="{{ p.valeur }}" class="input-petit">
+                            <button type="submit" class="btn-save">✓</button>
+                        </form>
+                    </td>
+                    <td>{{ p.unite if p.unite else '-' }}</td>
+                    <td>{{ p.annee_application }}</td>
+                    <td class="text-center">
+                        <a href="{{ url_for('parametrage.modifier_parametre_page', id_parametre=p.id_parametre) }}" class="btn-action btn-modifier">
+                            <span class="action-icon">✎</span> Modifier
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- SECTION 4 : CATALOGUE DES PRIMES/INDEMNITES -->
+<!-- ============================================ -->
+<!-- ============================================ -->
+<!-- SECTION 4 : CATALOGUE DES PRIMES/INDEMNITES -->
+<!-- ============================================ -->
+<!-- ============================================ -->
+<!-- SECTION 4 : CATALOGUE DES PRIMES/INDEMNITES -->
+<!-- ============================================ -->
+<div class="carte-parametrage">
+    <div class="carte-header">
+        <h2>Catalogue des primes / indemnités / retenues</h2>
+        <div class="carte-actions">
+            <span class="badge badge-legal">Modifiable</span>
+            <a href="{{ url_for('parametrage.nouvel_element_global') }}" class="btn-ajouter">
+                <span class="btn-icon">+</span> Ajouter
+            </a>
+        </div>
+    </div>
+    <div class="table-wrapper">
+        <table class="table-parametres">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Libellé</th>
+                    <th>Type</th>
+                    <th>Mode de calcul</th>
+                    <th>Valeur</th>
+                    <th>Plafond exonération</th>
+                    <th class="text-center">CNSS</th>
+                    <th class="text-center">IR</th>
+                    <th class="text-center">Actions</th>   <!-- ⚠️ COLONNE AJOUTÉE -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for e in elements %}
+                <tr>
+                    <td><strong>{{ e.code }}</strong></td>
+                    <td>{{ e.libelle }}</td>
+                    <td>
+                        <span class="badge badge-{{ e.type_element }}">
+                            {{ e.type_element }}
+                        </span>
+                    </td>
+                    <td>{{ e.mode_calcul }}</td>
+                    <td>{{ e.valeur if e.valeur else '-' }}</td>
+                    <td>{{ e.plafond_exoneration if e.plafond_exoneration else '—' }}</td>
+                    <td class="text-center">
+                        {% if e.soumis_cnss %}
+                            <span class="indicateur indicateur-oui">Oui</span>
+                        {% else %}
+                            <span class="indicateur indicateur-non">Non</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if e.soumis_ir %}
+                            <span class="indicateur indicateur-oui">Oui</span>
+                        {% else %}
+                            <span class="indicateur indicateur-non">Non</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        <div class="actions-param">
+                            <a href="{{ url_for('parametrage.modifier_element_page', id_element=e.id_element) }}" 
+                               class="btn-action btn-modifier">
+                                <span class="action-icon">✎</span> Modifier
+                            </a>
+                            <form method="post" action="{{ url_for('parametrage.supprimer_element_global', id_element=e.id_element) }}" 
+                                  class="form-action-inline" 
+                                  onsubmit="return confirm('Supprimer définitivement cet élément du catalogue global ?');">
+                                <button type="submit" class="btn-action btn-supprimer">
+                                    <span class="action-icon">✕</span> Supprimer
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

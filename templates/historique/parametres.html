@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block titre %}Historique des paramètres{% endblock %}
+{% block contenu %}
+
+<div class="page-header">
+    <div>
+        <h1>📋 Historique des modifications</h1>
+        <p class="sous-titre">Traçabilité des modifications des paramètres de paie</p>
+    </div>
+</div>
+
+<!-- Filtres -->
+<div class="filtres-barre">
+    <form method="get" action="{{ url_for('historique.historique_parametres') }}" class="form-filtres">
+        <div class="filtre-item">
+            <span class="filtre-label">Catégorie :</span>
+            <select name="categorie">
+                <option value="">Toutes</option>
+                {% for c in categories %}
+                <option value="{{ c.categorie }}" {{ 'selected' if filtre_categorie == c.categorie else '' }}>
+                    {{ c.categorie }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="filtre-item">
+            <span class="filtre-label">Utilisateur :</span>
+            <select name="utilisateur">
+                <option value="">Tous</option>
+                {% for u in utilisateurs %}
+                <option value="{{ u.id_utilisateur }}" {{ 'selected' if filtre_utilisateur == u.id_utilisateur|string else '' }}>
+                    {{ u.prenom }} {{ u.nom }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="filtre-actions">
+            <button type="submit" class="btn-filtre">Filtrer</button>
+            <a href="{{ url_for('historique.historique_parametres') }}" class="btn-annuler">Réinitialiser</a>
+        </div>
+    </form>
+</div>
+
+<!-- Résultats -->
+<div class="card">
+    <div class="resultats-info">
+        {{ total }} modification(s) trouvée(s)
+    </div>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Utilisateur</th>
+                    <th>Catégorie</th>
+                    <th>Élément</th>
+                    <th>Champ modifié</th>
+                    <th>Ancienne valeur</th>
+                    <th>Nouvelle valeur</th>
+                    <th>Société</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for h in historiques %}
+                <tr>
+                    <td>{{ h.date_modification[:16] if h.date_modification else '-' }}</td>
+                    <td>
+                        {% if h.id_utilisateur %}
+                            {{ h.prenom }} {{ h.nom }}
+                            <br><small style="color:#888;">{{ h.email }}</small>
+                        {% else %}
+                            <span style="color:#999;">Système</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge badge-{{ h.categorie|replace('_', '-') }}">
+                            {{ h.categorie }}
+                        </span>
+                    </td>
+                    <td>
+                        <strong>{{ h.code_element }}</strong>
+                        <br><small style="color:#888;">ID: {{ h.id_element }}</small>
+                    </td>
+                    <td>{{ h.champ_modifie }}</td>
+                    <td style="max-width:150px;word-break:break-all;">
+                        <span style="color:#b03a2e;">{{ h.ancienne_valeur }}</span>
+                    </td>
+                    <td style="max-width:150px;word-break:break-all;">
+                        <span style="color:#2e7d4f;">{{ h.nouvelle_valeur }}</span>
+                    </td>
+                    <td>{{ h.societe_nom if h.societe_nom else 'Global' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" style="text-align:center;padding:30px;color:#999;">
+                        Aucune modification enregistrée pour le moment.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    {% include "components/pagination.html" %}
+</div>
+
+{% endblock %}

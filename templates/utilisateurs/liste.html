@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block titre %}Utilisateurs{% endblock %}
+{% block contenu %}
+<h1>Utilisateurs (toutes sociétés)</h1>
+<a class="btn" href="{{ url_for('utilisateur.nouvel_utilisateur') }}">+ Nouvel utilisateur</a>
+
+<table>
+    <tr><th>Nom</th><th>Email</th><th>Rôle</th><th>Société</th><th>Statut</th><th>Actions</th></tr>
+    {% for u in utilisateurs %}
+    <tr>
+        <td>{{ u.prenom }} {{ u.nom }}</td>
+        <td>{{ u.email }}</td>
+        <td><span class="badge badge-societe">{{ u.role }}</span></td>
+        <td>{{ u.raison_sociale if u.raison_sociale else '—' }}</td>
+        <td>{{ 'Actif' if u.actif else 'Inactif' }}</td>
+        <td>
+            <a href="{{ url_for('utilisateur.modifier_utilisateur', id_utilisateur=u.id_utilisateur) }}">Modifier</a>
+            ·
+            <form method="post" action="{{ url_for('utilisateur.toggle_actif_utilisateur', id_utilisateur=u.id_utilisateur) }}" class="form-action-inline">
+                <button type="submit" class="lien-bouton">{{ 'Désactiver' if u.actif else 'Activer' }}</button>
+            </form>
+            ·
+            <form method="post" action="{{ url_for('utilisateur.supprimer_utilisateur', id_utilisateur=u.id_utilisateur) }}"
+                  class="form-action-inline"
+                  onsubmit="return confirm('Supprimer définitivement cet utilisateur (et sa fiche employé associée) ? Cette action est irréversible.');">
+                <button type="submit" class="lien-bouton lien-danger">Supprimer</button>
+            </form>
+        </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6">Aucun utilisateur pour le moment.</td></tr>
+    {% endfor %}
+</table>
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block titre %}Tableau de bord{% endblock %}
+{% block contenu %}
+<h1>Tableau de bord global</h1>
+
+<div class="cartes-stats">
+    <div class="carte-stat">
+        <div class="carte-stat-valeur">{{ stats.nb_societes }}</div>
+        <div class="carte-stat-label">Sociétés actives</div>
+    </div>
+    <div class="carte-stat">
+        <div class="carte-stat-valeur">{{ stats.nb_employes }}</div>
+        <div class="carte-stat-label">Employés (toutes sociétés)</div>
+    </div>
+    <div class="carte-stat">
+        <div class="carte-stat-valeur">{{ stats.nb_bulletins }}</div>
+        <div class="carte-stat-label">Bulletins générés</div>
+    </div>
+    <div class="carte-stat">
+        <div class="carte-stat-valeur">{{ "%.0f"|format(stats.masse_salariale) }} MAD</div>
+        <div class="carte-stat-label">Masse salariale totale versée</div>
+    </div>
+</div>
+
+<div class="cartes-graphiques">
+    <div class="carte-graphique">
+        <h2>Répartition des sociétés</h2>
+        <canvas id="graphiqueSocietes"></canvas>
+    </div>
+    <div class="carte-graphique">
+        <h2>Employés par société</h2>
+        <canvas id="graphiqueEmployes"></canvas>
+    </div>
+</div>
+
+<h2>Détail par société</h2>
+<table>
+    <tr><th>Société</th><th>Employés</th><th>Bulletins générés</th><th>Masse salariale</th></tr>
+    {% for s in par_societe %}
+    <tr>
+        <td>{{ s.raison_sociale }}</td>
+        <td>{{ s.nb_employes }}</td>
+        <td>{{ s.nb_bulletins }}</td>
+        <td>{{ "%.2f"|format(s.masse_salariale) }} MAD</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4">Aucune donnée disponible.</td></tr>
+    {% endfor %}
+</table>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+// --- Graphique en anneau : societes actives vs inactives ---
+const ctxSocietes = document.getElementById('graphiqueSocietes');
+new Chart(ctxSocietes, {
+    type: 'doughnut',
+    data: {
+        labels: ['Actives', 'Inactives'],
+        datasets: [{
+            data: [{{ stats.nb_societes }}, {{ stats.nb_societes_inactives }}],
+            backgroundColor: ['#2e7d4f', '#b03a2e'],
+            borderWidth: 0,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'bottom' }
+        }
+    }
+});
+
+// --- Graphique en barres : nombre d'employes par societe ---
+const ctxEmployes = document.getElementById('graphiqueEmployes');
+new Chart(ctxEmployes, {
+    type: 'bar',
+    data: {
+        labels: [{% for s in par_societe %}{{ s.raison_sociale|tojson }}{{ "," if not loop.last }}{% endfor %}],
+        datasets: [{
+            label: "Nombre d'employés",
+            data: [{% for s in par_societe %}{{ s.nb_employes }}{{ "," if not loop.last }}{% endfor %}],
+            backgroundColor: '#2e5c8a',
+            borderRadius: 4,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1 } }
+        }
+    }
+});
+</script>
+{% endblock %}

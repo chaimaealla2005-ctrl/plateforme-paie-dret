@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titre %}Plateforme Paie{% endblock %} — DRET Oriental</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+{% if session.id_utilisateur %}
+<nav class="navbar">
+    <div class="navbar-brand">Plateforme Paie — DRET Oriental</div>
+    <div class="navbar-links">
+        
+        {# === SUPER ADMIN === #}
+        {% if session.role == 'super_admin' %}
+            <a href="{{ url_for('dashboard.tableau_de_bord') }}" {% if request.endpoint == 'dashboard.tableau_de_bord' %}class="active"{% endif %}>Tableau de bord</a>
+            <a href="{{ url_for('societe.liste_societes') }}" {% if request.endpoint.startswith('societe') %}class="active"{% endif %}>Sociétés</a>
+            <a href="{{ url_for('personnel.liste_personnel') }}" {% if request.endpoint.startswith('personnel') %}class="active"{% endif %}>Personnel</a>
+            <a href="{{ url_for('dashboard.tous_les_bulletins') }}" {% if request.endpoint == 'dashboard.tous_les_bulletins' %}class="active"{% endif %}>Tous les bulletins</a>
+            <a href="{{ url_for('dashboard.journal') }}" {% if request.endpoint == 'dashboard.journal' %}class="active"{% endif %}>Journal</a>
+            <a href="{{ url_for('parametrage.vue_ensemble') }}" {% if request.endpoint.startswith('parametrage') and 'societe' not in request.endpoint %}class="active"{% endif %}>Paramétrage global</a>
+            <a href="{{ url_for('notification_parametres.vue_ensemble') }}" {% if request.endpoint.startswith('notification_parametres') %}class="active"{% endif %}>Notifications</a>
+            <a href="{{ url_for('historique.historique_parametres') }}" {% if request.endpoint.startswith('historique') %}class="active"{% endif %}>Historique paramètres</a>
+        {% endif %}
+        
+        {# === ADMIN SOCIETE === #}
+        {% if session.role == 'admin_societe' %}
+            <a href="{{ url_for('dashboard_societe.tableau_de_bord') }}" {% if request.endpoint.startswith('dashboard_societe') %}class="active"{% endif %}>Tableau de bord</a>
+            <a href="{{ url_for('employe.liste_employes') }}" {% if request.endpoint.startswith('employe') and request.endpoint != 'employe.statistiques_rh' %}class="active"{% endif %}>Employés</a>
+            <a href="{{ url_for('bulletin.liste_bulletins') }}" {% if request.endpoint == 'bulletin.liste_bulletins' %}class="active"{% endif %}>Bulletins</a>
+            <a href="{{ url_for('conge.gerer_conges') }}" {% if request.endpoint.startswith('conge') and 'gerer' in request.endpoint %}class="active"{% endif %}>Gestion congés</a>
+            <a href="{{ url_for('parametrage_societe.vue_ensemble') }}" {% if request.endpoint.startswith('parametrage_societe') %}class="active"{% endif %}>Paramètres</a>
+            <a href="{{ url_for('bulletin.mon_bulletin') }}" {% if request.endpoint == 'bulletin.mon_bulletin' %}class="active"{% endif %}>Mon bulletin</a>
+            <a href="{{ url_for('conge.mes_conges') }}" {% if request.endpoint.startswith('conge') and 'gerer' not in request.endpoint %}class="active"{% endif %}>Mes congés</a>
+            <a href="{{ url_for('employe.profil') }}" {% if request.endpoint == 'employe.profil' %}class="active"{% endif %}>Mon profil</a>
+        {% endif %}
+        
+        {# === RH === #}
+        {% if session.role == 'rh' %}
+            <a href="{{ url_for('employe.statistiques_rh') }}" {% if request.endpoint == 'employe.statistiques_rh' %}class="active"{% endif %}>Tableau de bord</a>
+            <a href="{{ url_for('employe.liste_employes') }}" {% if request.endpoint.startswith('employe') and request.endpoint != 'employe.statistiques_rh' %}class="active"{% endif %}>Employés</a>
+            <a href="{{ url_for('conge.gerer_conges') }}" {% if request.endpoint.startswith('conge') and 'gerer' in request.endpoint %}class="active"{% endif %}>Gestion congés</a>
+            <a href="{{ url_for('bulletin.mon_bulletin') }}" {% if request.endpoint == 'bulletin.mon_bulletin' %}class="active"{% endif %}>Mon bulletin</a>
+            <a href="{{ url_for('conge.mes_conges') }}" {% if request.endpoint.startswith('conge') and 'gerer' not in request.endpoint %}class="active"{% endif %}>Mes congés</a>
+            <a href="{{ url_for('employe.profil') }}" {% if request.endpoint == 'employe.profil' %}class="active"{% endif %}>Mon profil</a>
+        {% endif %}
+        
+        {# === COMPTABLE === #}
+        {% if session.role == 'comptable' %}
+            <a href="{{ url_for('bulletin.statistiques_bulletins') }}" {% if request.endpoint == 'bulletin.statistiques_bulletins' %}class="active"{% endif %}>Tableau de bord</a>
+            <a href="{{ url_for('employe.liste_employes') }}" {% if request.endpoint.startswith('employe') and request.endpoint != 'employe.statistiques_rh' %}class="active"{% endif %}>Employés</a>
+            <a href="{{ url_for('bulletin.liste_bulletins') }}" {% if request.endpoint == 'bulletin.liste_bulletins' %}class="active"{% endif %}>Bulletins</a>
+            <a href="{{ url_for('bulletin.mon_bulletin') }}" {% if request.endpoint == 'bulletin.mon_bulletin' %}class="active"{% endif %}>Mon bulletin</a>
+            <a href="{{ url_for('conge.mes_conges') }}" {% if request.endpoint.startswith('conge') and 'gerer' not in request.endpoint %}class="active"{% endif %}>Mes congés</a>
+            <a href="{{ url_for('employe.profil') }}" {% if request.endpoint == 'employe.profil' %}class="active"{% endif %}>Mon profil</a>
+        {% endif %}
+        
+        {# === EMPLOYE === #}
+        {% if session.role == 'employe' %}
+            <a href="{{ url_for('bulletin.mon_bulletin') }}" {% if request.endpoint == 'bulletin.mon_bulletin' %}class="active"{% endif %}>Mon bulletin</a>
+            <a href="{{ url_for('conge.mes_conges') }}" {% if request.endpoint.startswith('conge') and 'gerer' not in request.endpoint %}class="active"{% endif %}>Mes congés</a>
+            <a href="{{ url_for('employe.profil') }}" {% if request.endpoint == 'employe.profil' %}class="active"{% endif %}>Mon profil</a>
+        {% endif %}
+        
+        {# === UTILISATEUR === #}
+        <div class="navbar-user">
+            <span>{{ session.nom }}</span>
+            <span class="user-separator">·</span>
+            <span class="user-role">{{ session.role }}</span>
+            <a href="{{ url_for('auth.changer_mot_de_passe') }}" class="change-password-link">🔑 Changer mot de passe</a>
+            <a href="{{ url_for('auth.logout') }}">Déconnexion</a>
+        </div>
+        
+    </div>
+</nav>
+{% endif %}
+
+<main class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for categorie, message in messages %}
+                <div class="flash flash-{{ categorie }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% block contenu %}{% endblock %}
+</main>
+
+</body>
+</html>

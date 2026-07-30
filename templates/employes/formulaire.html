@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% block titre %}{{ 'Modifier' if employe else 'Nouvel' }} employé{% endblock %}
+{% block contenu %}
+
+<div class="page-header">
+    <div>
+        <h1>{{ 'Modifier' if employe else 'Nouvel employé' }}</h1>
+        <p class="sous-titre">Informations personnelles et professionnelles</p>
+    </div>
+</div>
+
+<div class="card">
+    <form method="post">
+        {% if session.role == 'super_admin' %}
+        <div class="form-group">
+            <label>Société *</label>
+            <select name="id_societe" class="form-control" required>
+                <option value="">-- Sélectionner --</option>
+                {% for s in societes %}
+                <option value="{{ s.id_societe }}" {{ 'selected' if employe and employe.id_societe == s.id_societe else '' }}>
+                    {{ s.raison_sociale }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+
+        <!-- ==========================================
+        CHOIX DU RÔLE (Admin Société et Super Admin)
+        ========================================== -->
+        {% if role_actuel in ['admin_societe', 'super_admin'] %}
+        <div class="form-group">
+            <label>Type de compte</label>
+            <select name="role" class="form-control" id="role_select" onchange="toggleChamps()">
+                <option value="employe" selected>Employé (consultation uniquement)</option>
+                <option value="rh">RH (gestion des employés)</option>
+                <option value="comptable">Comptable (génération des bulletins)</option>
+                {% if role_actuel == 'super_admin' %}
+                <option value="admin_societe">Admin Société</option>
+                <option value="super_admin">Super Admin</option>
+                {% endif %}
+            </select>
+            <small style="color:#888;">Le rôle détermine les droits d'accès à la plateforme.</small>
+        </div>
+        {% endif %}
+
+        <hr>
+
+        <h3>Informations d'identification</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Matricule *</label>
+                <input type="text" name="matricule" value="{{ employe.matricule if employe else '' }}" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>CIN</label>
+                <input type="text" name="cin" value="{{ employe.cin if employe else '' }}" class="form-control">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Nom *</label>
+                <input type="text" name="nom" value="{{ employe.nom if employe else '' }}" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Prénom *</label>
+                <input type="text" name="prenom" value="{{ employe.prenom if employe else '' }}" class="form-control" required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Email <span id="email_required" style="color:red;display:none;">*</span></label>
+                <input type="email" name="email" value="{{ employe.email if employe else '' }}" class="form-control" id="email_input">
+            </div>
+            <div class="form-group">
+                <label>Téléphone</label>
+                <input type="tel" name="telephone" value="{{ employe.telephone if employe else '' }}" class="form-control">
+            </div>
+        </div>
+
+        <hr>
+
+        <h3>Informations professionnelles</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Date d'embauche *</label>
+                <input type="date" name="date_embauche" value="{{ employe.date_embauche if employe else '' }}" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Poste</label>
+                <input type="text" name="poste" value="{{ employe.poste if employe else '' }}" class="form-control">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Grade</label>
+                <input type="text" name="grade" value="{{ employe.grade if employe else '' }}" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Salaire de base (MAD) *</label>
+                <input type="number" step="0.01" name="salaire_base" value="{{ employe.salaire_base if employe else '' }}" class="form-control" required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>RIB</label>
+                <input type="text" name="rib" value="{{ employe.rib if employe else '' }}" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>N° CNSS</label>
+                <input type="text" name="cnss_numero" value="{{ employe.cnss_numero if employe else '' }}" class="form-control" placeholder="Numéro d'affiliation CNSS">
+            </div>
+        </div>
+
+        <hr>
+
+        <h3>Informations personnelles</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Situation familiale</label>
+                <select name="situation_familiale" class="form-control">
+                    <option value="CELIBATAIRE" {{ 'selected' if employe and employe.situation_familiale == 'CELIBATAIRE' else '' }}>Célibataire</option>
+                    <option value="MARIE" {{ 'selected' if employe and employe.situation_familiale == 'MARIE' else '' }}>Marié(e)</option>
+                    <option value="DIVORCE" {{ 'selected' if employe and employe.situation_familiale == 'DIVORCE' else '' }}>Divorcé(e)</option>
+                    <option value="VEUF" {{ 'selected' if employe and employe.situation_familiale == 'VEUF' else '' }}>Veuf(ve)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Nombre d'enfants à charge</label>
+                <input type="number" name="nb_personnes_a_charge" value="{{ employe.nb_personnes_a_charge if employe else 0 }}" class="form-control" min="0">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Jours travaillés par mois</label>
+                <input type="number" name="jours_travailles" value="{{ employe.jours_travailles if employe else 26 }}" class="form-control" min="1" max="31">
+            </div>
+            <div class="form-group">
+                <label>Heures supplémentaires</label>
+                <input type="number" step="0.5" name="heures_sup" value="{{ employe.heures_sup if employe else 0 }}" class="form-control" min="0">
+            </div>
+        </div>
+
+        <!-- ==========================================
+        MOT DE PASSE (pour les comptes avec accès)
+        ========================================== -->
+        <div id="bloc_mot_de_passe">
+            <hr>
+            <h3>Accès à la plateforme</h3>
+            <div class="form-group">
+                <label>Mot de passe <span id="mdp_required" style="color:red;display:none;">*</span></label>
+                <input type="password" name="mot_de_passe" class="form-control" id="mdp_input" placeholder="Laissez vide pour un accès employé simple">
+                <small id="mdp_help" style="color:#888;">Si vous créez un compte RH ou Comptable, un mot de passe est obligatoire.</small>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-success">Enregistrer</button>
+            <a href="{{ url_for('employe.liste_employes') }}" class="btn btn-danger">Annuler</a>
+        </div>
+    </form>
+</div>
+
+<script>
+function toggleChamps() {
+    var role = document.getElementById('role_select');
+    var selectedRole = role.options[role.selectedIndex].value;
+    
+    var emailRequired = document.getElementById('email_required');
+    var emailInput = document.getElementById('email_input');
+    var mdpRequired = document.getElementById('mdp_required');
+    var mdpInput = document.getElementById('mdp_input');
+    var mdpHelp = document.getElementById('mdp_help');
+    
+    if (selectedRole === 'employe') {
+        emailRequired.style.display = 'none';
+        emailInput.removeAttribute('required');
+        mdpRequired.style.display = 'none';
+        mdpInput.removeAttribute('required');
+        mdpHelp.textContent = 'Laissez vide pour un accès employé simple.';
+    } else {
+        emailRequired.style.display = 'inline';
+        emailInput.setAttribute('required', 'required');
+        mdpRequired.style.display = 'inline';
+        mdpInput.setAttribute('required', 'required');
+        mdpHelp.textContent = 'Un mot de passe est obligatoire pour ce rôle.';
+    }
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block titre %}Journal des actions{% endblock %}
+{% block contenu %}
+<h1>Journal des actions (200 dernières)</h1>
+<table>
+    <tr><th>Date</th><th>Utilisateur</th><th>Société</th><th>Action</th><th>Détails</th></tr>
+    {% for a in actions %}
+    <tr>
+        <td>{{ a.date_action }}</td>
+        <td>{{ a.email if a.email else '—' }}</td>
+        <td>{{ a.raison_sociale if a.raison_sociale else '—' }}</td>
+        <td>{{ a.action }}</td>
+        <td>{{ a.details }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5">Aucune action enregistrée pour le moment.</td></tr>
+    {% endfor %}
+</table>
+{% endblock %}

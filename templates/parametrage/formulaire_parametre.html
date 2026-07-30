@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block titre %}Modifier le paramètre{% endblock %}
+{% block contenu %}
+<h1>Modifier — {{ parametre.libelle }}</h1>
+<form method="post">
+    <label>Valeur ({{ parametre.unite }})</label>
+    <input type="number" step="0.01" name="valeur" value="{{ parametre.valeur }}" required>
+
+    <button type="submit" class="btn">Enregistrer (s'applique à toutes les sociétés)</button>
+</form>
+{% endblock %}

@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Bulletin de paie</title>
+    <style>
+        /* ============================================
+           BULLETIN DE PAIE DETAILLE - STYLE PROFESSIONNEL
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            font-size: 9px;
+            color: #1a2332;
+            padding: 20px 30px;
+            background: white;
+        }
+        
+        .bulletin-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            border: 1px solid #d0d7df;
+            padding: 20px 25px;
+            border-radius: 4px;
+        }
+        
+        /* ============================================
+           EN-TÊTE
+           ============================================ */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #1f3864;
+            margin-bottom: 12px;
+        }
+        
+        .header-left {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header-left .societe {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1f3864;
+            letter-spacing: 0.5px;
+        }
+        
+        .header-left .adresse {
+            font-size: 8px;
+            color: #555;
+        }
+        
+        .header-left .identifiants {
+            font-size: 7px;
+            color: #777;
+            margin-top: 2px;
+        }
+        
+        .header-right {
+            text-align: right;
+        }
+        
+        .header-right .titre {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f3864;
+            letter-spacing: 1px;
+        }
+        
+        .header-right .periode {
+            font-size: 10px;
+            color: #555;
+            font-weight: 600;
+        }
+        
+        /* ============================================
+           INFORMATIONS SALARIE
+           ============================================ */
+        .info-salarie {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 4px 16px;
+            padding: 8px 12px;
+            background: #f7f8fa;
+            border-radius: 4px;
+            margin-bottom: 12px;
+            font-size: 8.5px;
+            border: 1px solid #e8ecf0;
+        }
+        
+        .info-salarie .label {
+            color: #6b7a8f;
+            font-weight: 500;
+        }
+        
+        .info-salarie .value {
+            color: #1a2332;
+            font-weight: 600;
+        }
+        
+        /* ============================================
+           TABLEAU PRINCIPAL
+           ============================================ */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8.5px;
+        }
+        
+        table thead th {
+            background: #1f3864;
+            color: white;
+            padding: 4px 6px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 7.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            border: 1px solid #1a2d44;
+        }
+        
+        table tbody td {
+            padding: 3px 6px;
+            border: 1px solid #d0d7df;
+            text-align: center;
+            vertical-align: middle;
+        }
+        
+        table tbody td.text-left {
+            text-align: left;
+        }
+        
+        table tbody td.text-right {
+            text-align: right;
+        }
+        
+        table tbody td.text-center {
+            text-align: center;
+        }
+        
+        table tbody tr:nth-child(even) {
+            background: #f7f8fa;
+        }
+        
+        table tbody tr.total-row {
+            background: #e8ecf0;
+            font-weight: 600;
+        }
+        
+        table tbody tr.total-row td {
+            border-top: 2px solid #1f3864;
+        }
+        
+        table tbody tr.sous-total td {
+            border-top: 1px solid #999;
+        }
+        
+        .montant-positif {
+            color: #1a6e34;
+        }
+        
+        .montant-negatif {
+            color: #a8323a;
+        }
+        
+        .montant-gras {
+            font-weight: 700;
+        }
+        
+        /* ============================================
+           PIED DE PAGE
+           ============================================ */
+        .footer {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #d0d7df;
+            display: flex;
+            justify-content: space-between;
+            font-size: 7px;
+            color: #888;
+        }
+        
+        .footer .mentions {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .footer .mentions .mode-paiement {
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .footer .signatures {
+            text-align: right;
+        }
+        
+        .footer .signatures .ligne {
+            margin-top: 4px;
+            padding-top: 4px;
+            border-top: 1px solid #ccc;
+            font-size: 7px;
+            color: #999;
+        }
+        
+        /* ============================================
+           BAREME IR
+           ============================================ */
+        .bareme-ir {
+            margin-top: 8px;
+            padding: 6px 10px;
+            background: #f7f8fa;
+            border: 1px solid #e8ecf0;
+            border-radius: 4px;
+            font-size: 7.5px;
+        }
+        
+        .bareme-ir .titre-bareme {
+            font-weight: 600;
+            color: #1f3864;
+            margin-bottom: 4px;
+        }
+        
+        .bareme-ir table {
+            font-size: 7px;
+            width: 100%;
+        }
+        
+        .bareme-ir table thead th {
+            background: #e8ecf0;
+            color: #333;
+            border: 1px solid #ccc;
+            padding: 2px 6px;
+            font-size: 6.5px;
+        }
+        
+        .bareme-ir table tbody td {
+            border: 1px solid #ccc;
+            padding: 2px 6px;
+            text-align: center;
+        }
+        
+        /* ============================================
+           MENTIONS LEGALES
+           ============================================ */
+        .mentions-legales {
+            margin-top: 10px;
+            padding: 8px 10px;
+            background: #f7f8fa;
+            border: 1px solid #e8ecf0;
+            border-radius: 4px;
+            font-size: 7px;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .mentions-legales strong {
+            color: #1f3864;
+        }
+        
+        /* ============================================
+           VERIFICATION
+           ============================================ */
+        .verification {
+            margin-top: 6px;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 7.5px;
+            text-align: center;
+        }
+        
+        .verification.ok {
+            background: #e6f4ea;
+            border: 1px solid #c8e6d0;
+            color: #1a6e34;
+        }
+        
+        .verification.ko {
+            background: #fce8ea;
+            border: 1px solid #f5d0d3;
+            color: #a8323a;
+        }
+        
+        /* ============================================
+           IMPRESSION
+           ============================================ */
+        @media print {
+            body { padding: 10px; }
+            .bulletin-container { border: none; padding: 0; }
+            table tbody tr:nth-child(even) { background: #f7f8fa; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bulletin-container">
+        
+        <!-- ==========================================
+        EN-TÊTE
+        ========================================== -->
+        <!-- Dans l'en-tête du bulletin -->
+        <div class="header">
+            <div class="header-left">
+            <!-- Afficher le logo -->
+                {% if logo_path %}
+                <div class="logo-container">
+                    <img src="{{ url_for('static', filename='uploads/logos/' + logo_path) }}" 
+                    alt="Logo" style="max-height: 60px; max-width: 150px;">
+                </div>
+                {% endif %}
+                <div class="societe">{{ employeur.raison_sociale or 'DIRECTION REGIONALE DE L\'EQUIPEMENT ET DU TRANSPORT' }}</div>
+                <div class="adresse">{{ employeur.adresse or 'Oriental, Maroc' }}</div>
+                <div class="identifiants">
+                    CNSS : {{ employeur.cnss or '123456789' }} &nbsp;|&nbsp;
+                    RC : {{ employeur.rc or '123456' }} &nbsp;|&nbsp;
+                    ICE : {{ employeur.ice or '00123456000078' }}
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="titre">BULLETIN DE PAIE</div>
+                <div class="periode">Période du {{ bulletin.mois }}/{{ bulletin.annee }}</div>
+            </div>
+        </div>
+        
+        <!-- ==========================================
+        IDENTIFICATION DU SALARIE
+        ========================================== -->
+        <div class="info-salarie">
+            <div><span class="label">Nom :</span> <span class="value">{{ employe.nom }}</span></div>
+            <div><span class="label">Prénom :</span> <span class="value">{{ employe.prenom }}</span></div>
+            <div><span class="label">Matricule :</span> <span class="value">{{ employe.matricule or '-' }}</span></div>
+            <div><span class="label">N° CNSS :</span> <span class="value">{{ employe.cnss_numero or '-' }}</span></div>
+            <div><span class="label">Situation familiale :</span> <span class="value">{{ employe.situation_familiale or 'MARIE' }}</span></div>
+            <div><span class="label">Nombre d'enfants :</span> <span class="value">{{ employe.nb_personnes_a_charge or 0 }}</span></div>
+            <div><span class="label">Fonction :</span> <span class="value">{{ employe.poste or '-' }}</span></div>
+            <div><span class="label">Date d'entrée :</span> <span class="value">{{ employe.date_embauche if employe.date_embauche else '-' }}</span></div>
+            <div><span class="label">Ancienneté :</span> <span class="value">{{ anciennete }} ans</span></div>
+            <div><span class="label">Jours travaillés :</span> <span class="value">{{ employe.jours_travailles or '26' }}</span></div>
+            <div><span class="label">Solde congés :</span> <span class="value">{{ solde_conges or '0' }} jours</span></div>
+            <div><span class="label">Période :</span> <span class="value">{{ bulletin.mois }}/{{ bulletin.annee }}</span></div>
+        </div>
+        
+        <!-- ==========================================
+        TABLEAU DES ELEMENTS DE REMUNERATION
+        ========================================== -->
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:22%;">RUBRIQUE</th>
+                    <th style="width:10%;">NOMBRE (j) OU BASE</th>
+                    <th style="width:8%;">TAUX</th>
+                    <th style="width:10%;">GAINS</th>
+                    <th style="width:10%;">RETENUES</th>
+                    <th style="width:10%;">PART PATRONALE</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- 1. SALAIRE DE BASE -->
+                <tr>
+                    <td class="text-left"><strong>SALAIRE DE BASE MENSUEL</strong></td>
+                    <td>{{ employe.jours_travailles or '26' }}</td>
+                    <td>{{ "%.2f"|format(salaire_journalier) }}</td>
+                    <td class="text-right montant-positif montant-gras">{{ "%.2f"|format(bulletin.salaire_base) }}</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right">—</td>
+                </tr>
+                
+                <!-- 2. PRIME D'ANCIENNETE -->
+                {% if prime_anciennete > 0 %}
+                <tr>
+                    <td class="text-left"><strong>PRIME D'ANCIENNETE</strong></td>
+                    <td>{{ "%.2f"|format(bulletin.salaire_base) }}</td>
+                    <td>{{ taux_anciennete }}%</td>
+                    <td class="text-right montant-positif montant-gras">{{ "%.2f"|format(prime_anciennete) }}</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right">—</td>
+                </tr>
+                {% endif %}
+                
+                <!-- 3. INDEMNITES (détail) -->
+                {% for indemnite in indemnites %}
+                <tr>
+                    <td class="text-left"><strong>{{ indemnite.libelle }}</strong></td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td class="text-right montant-positif">{{ "%.2f"|format(indemnite.montant) }}</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right">—</td>
+                </tr>
+                {% endfor %}
+                
+                <!-- 4. SOUS-TOTAL GAINS (corrigé) -->
+                <tr class="sous-total">
+                    <td class="text-left"><strong>TOTAL GAINS</strong></td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td class="text-right montant-gras">{{ "%.2f"|format(total_gains) }}</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right">—</td>
+                </tr>
+
+                <!-- 5. SALAIRE BRUT (corrigé) -->
+                <tr class="total-row">
+                    <td class="text-left"><strong>SALAIRE BRUT</strong></td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td class="text-right montant-positif montant-gras">{{ "%.2f"|format(bulletin.salaire_brut) }}</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right">—</td>
+                </tr>
+                
+                <!-- 6. COTISATIONS SALARIALES -->
+                <tr>
+                    <td class="text-left"><strong>COTISATION CNSS</strong></td>
+                    <td class="text-right">{{ "%.2f"|format(base_cnss) }}</td>
+                    <td>{{ taux_cnss }}%</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right montant-negatif">{{ "%.2f"|format(bulletin.total_cnss) }}</td>
+                    <td class="text-right">—</td>
+                </tr>
+                <tr>
+                    <td class="text-left"><strong>INDEMNITE DE PERTE EMPLOI</strong></td>
+                    <td class="text-right">{{ "%.2f"|format(base_cnss) }}</td>
+                    <td>{{ taux_perte_emploi }}%</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right montant-negatif">{{ "%.2f"|format(perte_emploi) }}</td>
+                    <td class="text-right">—</td>
+                </tr>
+                <tr>
+                    <td class="text-left"><strong>COTISATION AMO</strong></td>
+                    <td class="text-right">{{ "%.2f"|format(base_amo) }}</td>
+                    <td>{{ taux_amo }}%</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right montant-negatif">{{ "%.2f"|format(bulletin.total_amo) }}</td>
+                    <td class="text-right">—</td>
+                </tr>
+                <tr>
+                    <td class="text-left"><strong>ASSURANCE MALADIE (Mutuelle)</strong></td>
+                    <td class="text-right">{{ "%.2f"|format(base_amo) }}</td>
+                    <td>{{ taux_mutuelle }}%</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right montant-negatif">{{ "%.2f"|format(mutuelle_salarial) }}</td>
+                    <td class="text-right">—</td>
+                </tr>
+                <tr>
+                    <td class="text-left"><strong>COTISATION (CIMR)</strong></td>
+                    <td class="text-right">{{ "%.2f"|format(base_cimr) }}</td>
+                    <td>{{ taux_cimr_salarial }}%</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right montant-negatif">{{ "%.2f"|format(cimr_salarial) }}</td>
+                    <td class="text-right">—</td>
+                </tr>
+                
+                <!-- 7. SOUS-TOTAL COTISATIONS -->
+                <tr class="sous-total">
+                    <td class="text-left"><strong>TOTAL COTISATIONS SALARIALES</strong></td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right montant-negatif montant-gras">{{ "%.2f"|format(total_cotisations_salariales) }}</td>
+                    <td class="text-right">—</td>
+                </tr>
+                
+                <!-- 8. SALAIRE NET IMPOSABLE -->
+                <tr class="total-row">
+                    <td class="text-left"><strong>SALAIRE NET IMPOSABLE</strong></td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td class="text-right montant-positif montant-gras">{{ "%.2f"|format(bulletin.salaire_net_imposable) }}</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right">—</td>
+                </tr>
+                
+                <!-- 9. IR -->
+                <tr>
+                    <td class="text-left"><strong>IMPOT SUR LE REVENU (IR)</strong></td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right montant-negatif montant-gras">{{ "%.2f"|format(bulletin.total_ir) }}</td>
+                    <td class="text-right">—</td>
+                </tr>
+                
+                <!-- 10. COTISATIONS PATRONALES -->
+                <tr>
+                    <td class="text-left"><strong>COT. ALLOCATION FAMILIALE</strong></td>
+                    <td class="text-right">{{ "%.2f"|format(base_cnss) }}</td>
+                    <td>{{ taux_alloc_familiale }}%</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right montant-negatif">{{ "%.2f"|format(alloc_familiale_patronal) }}</td>
+                </tr>
+                <tr>
+                    <td class="text-left"><strong>COT. PRESTATIONS SOCIALES</strong></td>
+                    <td class="text-right">{{ "%.2f"|format(base_cnss) }}</td>
+                    <td>{{ taux_prestations }}%</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right montant-negatif">{{ "%.2f"|format(prestations_sociales_patronal) }}</td>
+                </tr>
+                <tr>
+                    <td class="text-left"><strong>COT. TAXE FORMATION PROF.</strong></td>
+                    <td class="text-right">{{ "%.2f"|format(base_cnss) }}</td>
+                    <td>{{ taux_taxe_formation }}%</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right montant-negatif">{{ "%.2f"|format(taxe_formation_patronal) }}</td>
+                </tr>
+                <tr>
+                    <td class="text-left"><strong>COT. AMO PATRONALE</strong></td>
+                    <td class="text-right">{{ "%.2f"|format(base_amo) }}</td>
+                    <td>{{ taux_amo_patronal }}%</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right montant-negatif">{{ "%.2f"|format(amo_patronal) }}</td>
+                </tr>
+                <tr>
+                    <td class="text-left"><strong>COT. MUTUELLE PATRONALE</strong></td>
+                    <td class="text-right">{{ "%.2f"|format(base_amo) }}</td>
+                    <td>{{ taux_mutuelle }}%</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right montant-negatif">{{ "%.2f"|format(mutuelle_patronal) }}</td>
+                </tr>
+                <tr>
+                    <td class="text-left"><strong>COT. CIMR PATRONAL</strong></td>
+                    <td class="text-right">{{ "%.2f"|format(base_cimr) }}</td>
+                    <td>{{ taux_cimr_patronal }}%</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right montant-negatif">{{ "%.2f"|format(cimr_patronal) }}</td>
+                </tr>
+                
+                <!-- 11. TOTAL COTISATIONS PATRONALES -->
+                <tr class="sous-total">
+                    <td class="text-left"><strong>TOTAL COTISATIONS PATRONALES</strong></td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right montant-negatif montant-gras">{{ "%.2f"|format(total_cotisations_patronales) }}</td>
+                </tr>
+                
+                <!-- 12. NET A PAYER -->
+                <tr class="total-row">
+                    <td class="text-left" style="font-size:11px;"><strong>NET A PAYER</strong></td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right">—</td>
+                    <td class="text-right" style="font-size:14px; font-weight:700; color:#1f3864;">
+                        {{ "%.2f"|format(bulletin.salaire_net_a_payer) }} MAD
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        
+       <!-- ==========================================
+BAREME IR (ANNUEL)
+========================================== -->
+<div class="bareme-ir">
+    <div class="titre-bareme">BAREME DE L'IMPOT SUR LE REVENU (IR) ANNUEL - {{ annee_courante }}</div>
+    <div style="font-size:7.5px; color:#888; margin-bottom:4px;">
+        (Montants en MAD - Barème applicable aux revenus salariaux)
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Tranche de revenu annuel (MAD)</th>
+                <th>Taux</th>
+                <th>Somme à déduire</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tranche in tranches_ir %}
+            <tr>
+                <td>
+                    {% if tranche.seuil_haut %}
+                        {{ "%.0f"|format(tranche.seuil_bas) }} - {{ "%.0f"|format(tranche.seuil_haut) }}
+                    {% else %}
+                        > {{ "%.0f"|format(tranche.seuil_bas) }}
+                    {% endif %}
+                </td>
+                <td>{{ tranche.taux }}%</td>
+                <td>{{ "%.0f"|format(tranche.somme_a_deduire) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+        
+        <!-- ==========================================
+        MENTIONS LEGALES
+        ========================================== -->
+        <div class="mentions-legales">
+            <div><strong>Mentions légales (arrêté n° 346-05 du 9 février 2005, BORM n° 5540)</strong></div>
+            <div><strong>Raison sociale :</strong> {{ employeur.raison_sociale or 'Société' }}</div>
+            <div><strong>Adresse :</strong> {{ employeur.adresse or 'Oujda, Oriental' }}</div>
+            <div><strong>CNSS Employeur :</strong> {{ employeur.cnss or '123456789' }}</div>
+            <div><strong>CNSS Salarié :</strong> {{ employe.cnss_numero or '-' }}</div>
+            <div><strong>Congés pris ce mois :</strong> {{ conges_pris_mois or 0 }} jours</div>
+            <div><strong>Date de paiement :</strong> {{ bulletin.date_paiement or bulletin.date_generation[:10] }}</div>
+            <div><strong>Mode de paiement :</strong> {{ mode_paiement or 'Virement bancaire / Chèque' }}</div>
+        </div>
+        
+    </div>
+</body>
+</html>

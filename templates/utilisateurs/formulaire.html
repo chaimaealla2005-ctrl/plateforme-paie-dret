@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block titre %}{{ 'Modifier' if utilisateur else 'Nouvel' }} utilisateur{% endblock %}
+{% block contenu %}
+<h1>{{ 'Modifier l\'utilisateur' if utilisateur else 'Nouvel utilisateur' }}</h1>
+<form method="post">
+    <label>Nom</label>
+    <input type="text" name="nom" value="{{ utilisateur.nom if utilisateur else '' }}" required>
+
+    <label>Prénom</label>
+    <input type="text" name="prenom" value="{{ utilisateur.prenom if utilisateur else '' }}" required>
+
+    <label>Email</label>
+    <input type="email" name="email" value="{{ utilisateur.email if utilisateur else '' }}" required>
+
+    {% if not utilisateur %}
+    <label>Mot de passe</label>
+    <input type="password" name="mot_de_passe" required>
+    {% endif %}
+
+    <label>Rôle</label>
+    <select name="role" id="role" onchange="toggleChamps()">
+        {% for r in roles %}
+        <option value="{{ r }}" {{ 'selected' if utilisateur and utilisateur.role == r else '' }}>{{ r }}</option>
+        {% endfor %}
+    </select>
+
+    <div id="bloc-societe">
+        <label>Société</label>
+        <select name="id_societe">
+            <option value="">— Choisir une société —</option>
+            {% for s in societes %}
+            <option value="{{ s.id_societe }}" {{ 'selected' if utilisateur and utilisateur.id_societe == s.id_societe else '' }}>
+                {{ s.raison_sociale }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    {% if not utilisateur %}
+    <div id="bloc-employe">
+        <p class="info">Cette personne est aussi un membre du personnel : sa fiche employé (paie) est créée en même temps que son compte.</p>
+
+        <label>Matricule</label>
+        <input type="text" name="matricule">
+
+        <label>Poste</label>
+        <input type="text" name="poste">
+
+        <label>Téléphone</label>
+        <input type="tel" name="telephone">
+
+        <label>Date d'embauche</label>
+        <input type="date" name="date_embauche">
+
+        <label>Salaire de base (MAD)</label>
+        <input type="number" step="0.01" name="salaire_base">
+
+        <label>Personnes à charge</label>
+        <input type="number" name="nb_personnes_a_charge" value="0" min="0">
+    </div>
+    {% endif %}
+
+    <button type="submit" class="btn">{{ 'Enregistrer' if utilisateur else 'Créer' }}</button>
+</form>
+
+<script>
+function toggleChamps() {
+    var role = document.getElementById('role').value;
+    var estSuperAdmin = (role === 'super_admin');
+    document.getElementById('bloc-societe').style.display = estSuperAdmin ? 'none' : 'block';
+    var blocEmploye = document.getElementById('bloc-employe');
+    if (blocEmploye) {
+        blocEmploye.style.display = estSuperAdmin ? 'none' : 'block';
+    }
+}
+window.onload = toggleChamps;
+</script>
+{% endblock %}

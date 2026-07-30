@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block titre %}Mes congés{% endblock %}
+{% block contenu %}
+
+<div class="page-header">
+    <div>
+        <h1>Mes congés</h1>
+        <p class="sous-titre">Gestion de mes demandes de congé</p>
+    </div>
+    <a href="{{ url_for('conge.demander_conge') }}" class="btn btn-success">+ Nouvelle demande</a>
+</div>
+
+<!-- Soldes de congés -->
+<!-- templates/conges/mes_conges.html - Ajouter dans la section des soldes -->
+
+<div class="card">
+    <div class="card-header">
+        <h2>Mes soldes de congés ({{ annee_courante }})</h2>
+    </div>
+    <div class="soldes-grid">
+        {% for solde in soldes %}
+        <div class="solde-item" data-type="{{ solde.code }}">
+            <div class="solde-nombre">
+                {% if solde.code == 'CP' %}
+                    {{ solde.jours_restants|int }}
+                {% elif solde.code in ['MALADIE', 'EXCEPTIONNEL', 'SANS_SOLDE'] %}
+                    ∞
+                {% else %}
+                    {{ solde.jours_restants|int }}
+                {% endif %}
+            </div>
+            <div class="solde-info">
+                <div class="solde-libelle">{{ solde.libelle }}</div>
+                <div class="solde-details">
+                    {% if solde.code == 'CP' %}
+                        <span class="solde-acquis">Acquis: {{ solde.jours_acquis|int }}</span>
+                        <span class="solde-pris">Pris: {{ solde.jours_pris|int }}</span>
+                        <span class="solde-restant">Restant: {{ solde.jours_restants|int }}</span>
+                        {% if solde.jours_restants < 5 and solde.jours_restants > 0 %}
+                            <span class="solde-alerte">⚠️ Solde faible</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="solde-info-text">{{ solde.description or '—' }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Demandes -->
+<div class="card">
+    <div class="card-header">
+        <h2>Mes demandes</h2>
+    </div>
+    {% if demandes %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Période</th>
+                    <th>Jours</th>
+                    <th>Statut</th>
+                    <th>Date demande</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in demandes %}
+                <tr>
+                    <td>{{ d.libelle }}</td>
+                    <td>{{ d.date_debut }} → {{ d.date_fin }}</td>
+                    <td>{{ d.nb_jours_ouvres|int }}</td>
+                    <td>
+                        {% if d.statut == 'en_attente' %}
+                            <span class="badge badge-warning">En attente</span>
+                        {% elif d.statut == 'approuve' %}
+                            <span class="badge badge-active">Approuvé</span>
+                        {% elif d.statut == 'refuse' %}
+                            <span class="badge badge-inactive">Refusé</span>
+                        {% else %}
+                            <span class="badge badge-inactive">Annulé</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ d.date_demande[:10] }}</td>
+                    <td>
+                        {% if d.statut == 'en_attente' %}
+                        <form method="post" action="{{ url_for('conge.annuler_conge', id_conge=d.id_conge) }}" 
+                              class="form-action-inline"
+                              onsubmit="return confirm('Annuler cette demande ?');">
+                            <button type="submit" class="lien-bouton lien-danger">Annuler</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="text-align:center;padding:20px;color:#999;">
+        Aucune demande de congé pour le moment.
+    </p>
+    {% endif %}
+</div>
+
+{% endblock %}

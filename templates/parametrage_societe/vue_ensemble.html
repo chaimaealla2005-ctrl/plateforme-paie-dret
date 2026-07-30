@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+{% block titre %}Paramétrage - {{ societe.raison_sociale }}{% endblock %}
+{% block contenu %}
+
+<div class="page-header">
+    <div>
+        <h1>Paramétrage de ma société</h1>
+        <p class="sous-titre">{{ societe.raison_sociale }}</p>
+    </div>
+</div>
+
+<div class="info-banner">
+    <span class="info-icon">i</span>
+    <span>
+        Les valeurs marquées <strong>« Légal »</strong> sont les valeurs par défaut.
+        Pour les personnaliser, modifiez-les, elles deviendront <strong>« Société »</strong>.
+    </span>
+</div>
+
+<!-- ============================================ -->
+<!-- SECTION 1 : COTISATIONS SOCIALES -->
+<!-- ============================================ -->
+<div class="carte-parametrage">
+    <div class="carte-header">
+        <h2>Cotisations sociales</h2>
+        <span class="badge badge-societe">Personnalisable</span>
+    </div>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Libellé</th>
+                    <th>Taux salarié (%)</th>
+                    <th>Taux patronal (%)</th>
+                    <th>Plafond mensuel</th>
+                    <th>Origine</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in baremes %}
+                <tr>
+                    <td><strong>{{ b.code }}</strong></td>
+                    <td>{{ b.libelle }}</td>
+                    <td>{{ b.taux_salarial }}</td>
+                    <td>{{ b.taux_patronal if b.taux_patronal else '—' }}</td>
+                    <td>{{ b.plafond_mensuel if b.plafond_mensuel else 'Illimité' }}</td>
+                    <td>
+                        {% if b.id_societe %}
+                            <span class="badge badge-societe">Société</span>
+                        {% else %}
+                            <span class="badge badge-legal">Légal</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        <div class="actions-param">
+                            <a href="{{ url_for('parametrage_societe.modifier_bareme_page', id_bareme=b.id_bareme) }}" 
+                               class="btn-action btn-modifier">
+                                <span class="action-icon">✎</span> Modifier
+                            </a>
+                            {% if b.id_societe %}
+                            <form method="post" action="{{ url_for('parametrage_societe.supprimer_bareme', id_bareme=b.id_bareme) }}" 
+                                  class="form-action-inline" 
+                                  onsubmit="return confirm('Supprimer ce barème personnalisé ?');">
+                                <button type="submit" class="btn-action btn-supprimer">
+                                    <span class="action-icon">✕</span> Supprimer
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- SECTION 2 : TRANCHES IR -->
+<!-- ============================================ -->
+<div class="carte-parametrage">
+    <div class="carte-header">
+        <h2>Barème de l'Impôt sur le Revenu (IR)</h2>
+        <span class="badge badge-societe">Personnalisable</span>
+    </div>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Seuil bas</th>
+                    <th>Seuil haut</th>
+                    <th>Taux (%)</th>
+                    <th>Somme à déduire</th>
+                    <th>Origine</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tranches %}
+                <tr>
+                    <td>
+                        <form method="post" action="{{ url_for('parametrage_societe.modifier_tranche', id_tranche=t.id_tranche) }}" class="form-inline">
+                            <input type="number" step="0.01" name="seuil_bas" value="{{ t.seuil_bas }}" class="input-petit" style="width:90px;">
+                    </td>
+                    <td>
+                            <input type="number" step="0.01" name="seuil_haut" value="{{ t.seuil_haut if t.seuil_haut else '' }}" class="input-petit" style="width:90px;" placeholder="Illimité">
+                    </td>
+                    <td>
+                            <input type="number" step="0.01" name="taux" value="{{ t.taux }}" class="input-petit" style="width:70px;">
+                    </td>
+                    <td>
+                            <input type="number" step="0.01" name="somme_a_deduire" value="{{ t.somme_a_deduire }}" class="input-petit" style="width:90px;">
+                    </td>
+                    <td>
+                        {% if t.id_societe %}
+                            <span class="badge badge-societe">Société</span>
+                        {% else %}
+                            <span class="badge badge-legal">Légal</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        <div class="actions-param">
+                            <button type="submit" class="btn-save" title="Enregistrer">✓</button>
+                            </form>
+                            {% if t.id_societe %}
+                            <form method="post" action="{{ url_for('parametrage_societe.supprimer_tranche', id_tranche=t.id_tranche) }}" 
+                                  class="form-action-inline" 
+                                  onsubmit="return confirm('Supprimer cette tranche personnalisée ?');">
+                                <button type="submit" class="btn-action btn-supprimer">
+                                    <span class="action-icon">✕</span> Supprimer
+                                </button>
+                            </form>
+                            {% else %}
+                            <form method="post" action="{{ url_for('parametrage_societe.copier_tranche', id_tranche=t.id_tranche) }}" class="form-action-inline">
+                                <button type="submit" class="btn-action btn-copier">
+                                    <span class="action-icon">📋</span> Personnaliser
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- SECTION 3 : PARAMETRES LEGAUX -->
+<!-- ============================================ -->
+<div class="carte-parametrage">
+    <div class="carte-header">
+        <h2>Paramètres légaux</h2>
+        <span class="badge badge-societe">Personnalisable</span>
+    </div>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Libellé</th>
+                    <th>Valeur</th>
+                    <th>Unité</th>
+                    <th>Origine</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in parametres %}
+                <tr>
+                    <td><strong>{{ p.code }}</strong></td>
+                    <td>{{ p.libelle }}</td>
+                    <td>{{ p.valeur }}</td>
+                    <td>{{ p.unite if p.unite else '-' }}</td>
+                    <td>
+                        {% if p.id_societe %}
+                            <span class="badge badge-societe">Société</span>
+                        {% else %}
+                            <span class="badge badge-legal">Légal</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        <div class="actions-param">
+                            <a href="{{ url_for('parametrage_societe.modifier_parametre_page', id_parametre=p.id_parametre) }}" 
+                               class="btn-action btn-modifier">
+                                <span class="action-icon">✎</span> Modifier
+                            </a>
+                            {% if p.id_societe %}
+                            <form method="post" action="{{ url_for('parametrage_societe.supprimer_parametre', id_parametre=p.id_parametre) }}" 
+                                  class="form-action-inline" 
+                                  onsubmit="return confirm('Supprimer ce paramètre personnalisé ?');">
+                                <button type="submit" class="btn-action btn-supprimer">
+                                    <span class="action-icon">✕</span> Supprimer
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- SECTION 4 : CATALOGUE DES PRIMES -->
+<!-- ============================================ -->
+<div class="carte-parametrage">
+    <div class="carte-header">
+        <h2>Catalogue des primes / indemnités / retenues</h2>
+        <div class="carte-actions">
+            <span class="badge badge-societe">Personnalisable</span>
+            <a href="{{ url_for('parametrage_societe.nouvel_element') }}" class="btn-ajouter">
+                <span class="btn-icon">+</span> Ajouter
+            </a>
+        </div>
+    </div>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Libellé</th>
+                    <th>Type</th>
+                    <th>Mode de calcul</th>
+                    <th>Valeur</th>
+                    <th>Plafond</th>
+                    <th class="text-center">CNSS</th>
+                    <th class="text-center">IR</th>
+                    <th>Origine</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for e in elements %}
+                <tr>
+                    <td>{{ e.libelle }}</td>
+                    <td>
+                        <span class="badge badge-{{ e.type_element }}">
+                            {{ e.type_element }}
+                        </span>
+                    </td>
+                    <td>{{ e.mode_calcul }}</td>
+                    <td>{{ e.valeur if e.valeur else '-' }}</td>
+                    <td>{{ e.plafond_exoneration if e.plafond_exoneration else '—' }}</td>
+                    <td class="text-center">
+                        {% if e.soumis_cnss %}
+                            <span class="indicateur indicateur-oui">Oui</span>
+                        {% else %}
+                            <span class="indicateur indicateur-non">Non</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if e.soumis_ir %}
+                            <span class="indicateur indicateur-oui">Oui</span>
+                        {% else %}
+                            <span class="indicateur indicateur-non">Non</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if e.id_societe %}
+                            <span class="badge badge-societe">Société</span>
+                        {% else %}
+                            <span class="badge badge-legal">Légal</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        <div class="actions-param">
+                            {% if e.id_societe %}
+                                <!-- Élément de la société : page de modification dédiée -->
+                                <a href="{{ url_for('parametrage_societe.modifier_element_page', id_element=e.id_element) }}" 
+                                   class="btn-action btn-modifier">
+                                    <span class="action-icon">✎</span> Modifier
+                                </a>
+                                <form method="post" action="{{ url_for('parametrage_societe.supprimer_element', id_element=e.id_element) }}" 
+                                      class="form-action-inline" 
+                                      onsubmit="return confirm('Supprimer cet élément de votre catalogue ?');">
+                                    <button type="submit" class="btn-action btn-supprimer">
+                                        <span class="action-icon">✕</span> Supprimer
+                                    </button>
+                                </form>
+                            {% else %}
+                                <!-- Élément légal : bouton pour le copier dans la société -->
+                                <form method="post" action="{{ url_for('parametrage_societe.copier_element', id_element=e.id_element) }}" class="form-action-inline">
+                                    <button type="submit" class="btn-action btn-copier">
+                                        <span class="action-icon">📋</span> Personnaliser
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

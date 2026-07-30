@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block titre %}Mon profil{% endblock %}
+{% block contenu %}
+
+<div class="page-header">
+    <div>
+        <h1>Mon profil</h1>
+        <p class="sous-titre">Mes informations personnelles</p>
+    </div>
+    <a href="{{ url_for('employe.modifier_profil') }}" class="btn btn-primary">Modifier mes coordonnées</a>
+</div>
+
+<div class="card">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div>
+            <strong>Matricule</strong>
+            <p>{{ employe.matricule or '-' }}</p>
+        </div>
+        <div>
+            <strong>Nom complet</strong>
+            <p>{{ employe.prenom }} {{ employe.nom }}</p>
+        </div>
+        <div>
+            <strong>CIN</strong>
+            <p>{{ employe.cin or '-' }}</p>
+        </div>
+        <div>
+            <strong>Poste</strong>
+            <p>{{ employe.poste or '-' }}</p>
+        </div>
+        <div>
+            <strong>Grade</strong>
+            <p>{{ employe.grade or '-' }}</p>
+        </div>
+        <div>
+            <strong>Salaire de base</strong>
+            <p>{{ employe.salaire_base }} MAD</p>
+        </div>
+        <div>
+            <strong>Date d'embauche</strong>
+            <p>{{ employe.date_embauche if employe.date_embauche else '-' }}</p>
+        </div>
+        <div>
+            <strong>Personnes à charge</strong>
+            <p>{{ employe.nb_personnes_a_charge }}</p>
+        </div>
+        <div>
+            <strong>Email</strong>
+            <p>{{ email }}</p>
+        </div>
+        <div>
+            <strong>Téléphone</strong>
+            <p>{{ employe.telephone or '-' }}</p>
+        </div>
+        <div>
+            <strong>RIB</strong>
+            <p>{{ employe.rib or '-' }}</p>
+        </div>
+        <div>
+            <strong>Société</strong>
+            <p>{{ employe.raison_sociale if employe.raison_sociale else '-' }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- Dans la section Actions rapides -->
+<div class="card">
+    <div class="card-header">
+        <h2>Actions rapides</h2>
+    </div>
+    <div class="actions-rapides">
+        <a href="{{ url_for('bulletin.mon_bulletin') }}" class="btn btn-primary">Voir mes bulletins</a>
+        <a href="{{ url_for('employe.modifier_profil') }}" class="btn btn-outline">Modifier mes coordonnées</a>
+        <a href="{{ url_for('auth.changer_mot_de_passe') }}" class="btn btn-warning">🔑 Changer mon mot de passe</a>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block titre %}Tableau de bord - {{ societe.raison_sociale }}{% endblock %}
+{% block contenu %}
+
+<div class="page-header">
+    <div>
+        <h1>Tableau de bord</h1>
+        <p class="sous-titre">{{ societe.raison_sociale }}</p>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- STATISTIQUES -->
+<!-- ============================================ -->
+<div class="stats-mini">
+    <div class="stat-item">
+        <div class="stat-nb">{{ total_employes }}</div>
+        <div class="stat-label">Employés actifs</div>
+    </div>
+    <div class="stat-item stat-inactif">
+        <div class="stat-nb">{{ total_employes_inactifs }}</div>
+        <div class="stat-label">Employés inactifs</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-nb">{{ bulletins_mois }}</div>
+        <div class="stat-label">Bulletins du mois</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-nb">{{ total_bulletins }}</div>
+        <div class="stat-label">Total bulletins</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-nb">{{ "%.0f"|format(masse_salariale_mois) }} MAD</div>
+        <div class="stat-label">Masse salariale du mois</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-nb">{{ "%.0f"|format(masse_salariale_totale) }} MAD</div>
+        <div class="stat-label">Masse salariale totale</div>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- ACTIONS RAPIDES -->
+<!-- ============================================ -->
+<div class="card">
+    <div class="card-header">
+        <h2>Actions rapides</h2>
+    </div>
+    <div class="actions-rapides">
+        <a href="{{ url_for('employe.nouvel_employe') }}" class="btn btn-success">+ Ajouter un employé</a>
+        <a href="{{ url_for('employe.liste_employes') }}" class="btn btn-primary">Voir tous les employés</a>
+        <a href="{{ url_for('bulletin.liste_bulletins') }}" class="btn btn-info">Voir tous les bulletins</a>
+        <a href="{{ url_for('parametrage_societe.vue_ensemble') }}" class="btn btn-warning">Paramètres de ma société</a>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- ALERTES : EMPLOYÉS SANS BULLETIN -->
+<!-- ============================================ -->
+{% if employes_sans_bulletin %}
+<div class="card" style="border-left: 4px solid var(--red);">
+    <div class="card-header">
+        <h2 style="color: var(--red);">⚠️ Employés sans bulletin ({{ mois_courant }}/{{ annee_courante }})</h2>
+    </div>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Matricule</th>
+                    <th>Nom</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for e in employes_sans_bulletin %}
+                <tr>
+                    <td>{{ e.matricule }}</td>
+                    <td>{{ e.prenom }} {{ e.nom }}</td>
+                    <td>
+                        <a href="{{ url_for('bulletin.generer_bulletin', id_employe=e.id_employe) }}" class="btn btn-petit btn-modifier">Générer</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- ============================================ -->
+<!-- DERNIERS BULLETINS -->
+<!-- ============================================ -->
+<div class="card">
+    <div class="card-header">
+        <h2>Derniers bulletins générés</h2>
+        <a href="{{ url_for('bulletin.liste_bulletins') }}" class="btn btn-petit btn-modifier">Voir tout</a>
+    </div>
+    {% if derniers_bulletins %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Employé</th>
+                    <th>Période</th>
+                    <th>Net à payer</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in derniers_bulletins %}
+                <tr>
+                    <td>{{ b.prenom }} {{ b.nom }}</td>
+                    <td>{{ b.mois }}/{{ b.annee }}</td>
+                    <td><strong>{{ b.salaire_net_a_payer }} MAD</strong></td>
+                    <td>
+                        <a href="{{ url_for('bulletin.detail_bulletin', id_bulletin=b.id_bulletin) }}" class="btn btn-petit btn-info">Voir</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="color:#999;text-align:center;padding:20px;">Aucun bulletin généré pour le moment.</p>
+    {% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block titre %}Primes & indemnités{% endblock %}
+{% block contenu %}
+
+<div class="page-header">
+    <div>
+        <h1>Catalogue des primes / indemnités / retenues</h1>
+        <p class="sous-titre">
+            Les lignes marquées <strong>« Légal »</strong> viennent de la loi marocaine.
+            Les lignes <strong>« Société »</strong> sont spécifiques à votre société.
+        </p>
+    </div>
+    {% if session.role == 'admin_societe' %}
+    <a href="{{ url_for('element.nouvel_element_societe') }}" class="btn">+ Ajouter pour ma société</a>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Libellé</th>
+                    <th>Type</th>
+                    <th>Mode de calcul</th>
+                    <th>Valeur</th>
+                    <th>Plafond exonération</th>
+                    <th>CNSS</th>
+                    <th>IR</th>
+                    <th>Origine</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for el in elements %}
+                <tr>
+                    <td><strong>{{ el.code }}</strong></td>
+                    <td>{{ el.libelle }}</td>
+                    <td>
+                        <span class="badge badge-{{ el.type_element }}">
+                            {{ el.type_element }}
+                        </span>
+                    </td>
+                    <td>{{ el.mode_calcul }}</td>
+                    <td>{{ el.valeur if el.valeur else '-' }}</td>
+                    <td>{{ el.plafond_exoneration if el.plafond_exoneration else '—' }}</td>
+                    <td class="text-center">
+                        {% if el.soumis_cnss %}
+                            <span class="indicateur indicateur-oui">Oui</span>
+                        {% else %}
+                            <span class="indicateur indicateur-non">Non</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if el.soumis_ir %}
+                            <span class="indicateur indicateur-oui">Oui</span>
+                        {% else %}
+                            <span class="indicateur indicateur-non">Non</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if el.id_societe %}
+                            <span class="badge badge-societe">Société</span>
+                        {% else %}
+                            <span class="badge badge-legal">Légal</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        <div class="actions-param">
+                            {% if session.role == 'admin_societe' %}
+                                {% if el.id_societe %}
+                                    <!-- Élément de la société : on peut le modifier/supprimer -->
+                                    <a href="{{ url_for('element.modifier_element_societe', id_element=el.id_element) }}" 
+                                       class="btn-action btn-modifier">
+                                        <span class="action-icon">✎</span> Modifier
+                                    </a>
+                                    <form method="post" action="{{ url_for('element.supprimer_element_societe', id_element=el.id_element) }}" 
+                                          class="form-action-inline" 
+                                          onsubmit="return confirm('Supprimer cet élément de votre catalogue ?');">
+                                        <button type="submit" class="btn-action btn-supprimer">
+                                            <span class="action-icon">✕</span> Supprimer
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <!-- Élément légal : bouton pour le copier dans la société -->
+                                    <form method="post" action="{{ url_for('element.copier_element_societe', id_element=el.id_element) }}" class="form-action-inline">
+                                        <button type="submit" class="btn-action btn-modifier">
+                                            <span class="action-icon">📋</span> Personnaliser
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            {% else %}
+                                <span style="font-size:11px;color:#888;">Lecture seule</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

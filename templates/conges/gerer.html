@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block titre %}Gestion des congés{% endblock %}
+{% block contenu %}
+
+<div class="page-header">
+    <div>
+        <h1>Gestion des congés</h1>
+        <p class="sous-titre">Approuver ou refuser les demandes de congé</p>
+    </div>
+</div>
+
+<!-- Modal pour afficher les documents -->
+<div id="modal-document" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; justify-content:center; align-items:center;">
+    <div style="background:white; padding:20px; border-radius:8px; max-width:90%; max-height:90%; overflow:auto; position:relative; width:800px;">
+        <button onclick="document.getElementById('modal-document').style.display='none'" 
+                style="position:absolute; top:10px; right:15px; background:var(--red); color:white; border:none; border-radius:50%; width:35px; height:35px; font-size:18px; cursor:pointer; z-index:10;">
+            ✕
+        </button>
+        <iframe id="iframe-document" src="" style="width:100%; height:600px; border:none;"></iframe>
+        <div style="text-align:center; margin-top:10px;">
+            <button onclick="document.getElementById('modal-document').style.display='none'" 
+                    class="btn btn-danger">Fermer</button>
+        </div>
+    </div>
+</div>
+
+<!-- Demandes en attente -->
+<div class="card">
+    <div class="card-header">
+        <h2>Demandes en attente</h2>
+    </div>
+    {% if demandes_attente %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Employé</th>
+                    <th>Type</th>
+                    <th>Période</th>
+                    <th>Jours</th>
+                    <th>Pièce jointe</th>
+                    <th>Date demande</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in demandes_attente %}
+                <tr>
+                    <td>{{ d.prenom }} {{ d.nom }}<br><small>{{ d.matricule }}</small></td>
+                    <td>{{ d.type_libelle }}</td>
+                    <td>{{ d.date_debut }} → {{ d.date_fin }}</td>
+                    <td>{{ d.nb_jours_ouvres|int }}</td>
+                    <td>
+                        {% if d.piece_jointe %}
+                            <button onclick="ouvrirDocument('{{ url_for('conge.telecharger_piece_jointe', filename=d.piece_jointe) }}')" 
+                                    class="btn btn-petit btn-info">
+                                📄 Voir le document
+                            </button>
+                            <br>
+                            <small style="font-size:9px;color:#888;">
+                                {% if d.type_libelle == 'Congé maladie' %}
+                                    Certificat médical
+                                {% elif d.type_libelle == 'Congé exceptionnel' %}
+                                    Pièce justificative
+                                {% endif %}
+                            </small>
+                        {% else %}
+                            <span style="color:#999;font-size:11px;">Aucun document</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ d.date_demande[:10] }}</td>
+                    <td>
+                        <form method="post" action="{{ url_for('conge.repondre_conge', id_conge=d.id_conge) }}" style="display:inline;">
+                            <input type="hidden" name="action" value="approuver">
+                            <button type="submit" class="btn btn-petit btn-activer">Approuver</button>
+                        </form>
+                        <button onclick="document.getElementById('refus-form-{{ d.id_conge }}').style.display='inline'" 
+                                class="btn btn-petit btn-supprimer">Refuser</button>
+                        <form id="refus-form-{{ d.id_conge }}" method="post" action="{{ url_for('conge.repondre_conge', id_conge=d.id_conge) }}" 
+                              style="display:none;margin-top:4px;">
+                            <input type="hidden" name="action" value="refuser">
+                            <input type="text" name="commentaire" placeholder="Motif du refus" style="width:150px;padding:2px 6px;font-size:12px;">
+                            <button type="submit" class="btn btn-petit btn-supprimer">Confirmer</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="text-align:center;padding:20px;color:#999;">Aucune demande en attente.</p>
+    {% endif %}
+</div>
+
+<!-- Historique -->
+<div class="card">
+    <div class="card-header">
+        <h2>Historique des demandes</h2>
+    </div>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Employé</th>
+                    <th>Type</th>
+                    <th>Période</th>
+                    <th>Jours</th>
+                    <th>Pièce jointe</th>
+                    <th>Statut</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in toutes_demandes %}
+                <tr>
+                    <td>{{ d.prenom }} {{ d.nom }}</td>
+                    <td>{{ d.type_libelle }}</td>
+                    <td>{{ d.date_debut }} → {{ d.date_fin }}</td>
+                    <td>{{ d.nb_jours_ouvres|int }}</td>
+                    <td>
+                        {% if d.piece_jointe %}
+                            <button onclick="ouvrirDocument('{{ url_for('conge.telecharger_piece_jointe', filename=d.piece_jointe) }}')" 
+                                    class="btn btn-petit btn-info" style="font-size:10px;">
+                                📄 Document
+                            </button>
+                        {% else %}
+                            <span style="color:#999;font-size:11px;">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if d.statut == 'en_attente' %}
+                            <span class="badge badge-warning">En attente</span>
+                        {% elif d.statut == 'approuve' %}
+                            <span class="badge badge-active">Approuvé</span>
+                        {% elif d.statut == 'refuse' %}
+                            <span class="badge badge-inactive">Refusé</span>
+                        {% else %}
+                            <span class="badge badge-inactive">Annulé</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function ouvrirDocument(url) {
+    document.getElementById('iframe-document').src = url;
+    document.getElementById('modal-document').style.display = 'flex';
+}
+</script>
+
+{% endblock %}

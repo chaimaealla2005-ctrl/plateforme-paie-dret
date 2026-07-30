@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block titre %}{{ 'Modifier' if personnel else 'Nouveau' }} personnel{% endblock %}
+{% block contenu %}
+<h1>{{ 'Modifier' if personnel else 'Nouveau personnel' }}</h1>
+
+<form method="post">
+    <div class="form-row">
+        <div class="form-group">
+            <label>Nom *</label>
+            <input type="text" name="nom" value="{{ personnel.nom if personnel else '' }}" required>
+        </div>
+        <div class="form-group">
+            <label>Prénom *</label>
+            <input type="text" name="prenom" value="{{ personnel.prenom if personnel else '' }}" required>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Email *</label>
+        <input type="email" name="email" value="{{ personnel.email if personnel else '' }}" required>
+    </div>
+
+    {% if not personnel %}
+    <div class="form-group">
+        <label>Mot de passe *</label>
+        <input type="password" name="mot_de_passe" required>
+    </div>
+    {% endif %}
+
+    <div class="form-group">
+        <label>Rôle *</label>
+        <select name="role" id="role" onchange="toggleChamps()" required>
+            {% for r in roles %}
+            <option value="{{ r }}" {{ 'selected' if personnel and personnel.role == r else '' }}>{{ r }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div id="bloc-societe">
+        <div class="form-group">
+            <label>Société</label>
+            <select name="id_societe">
+                <option value="">— Choisir une société —</option>
+                {% for s in societes %}
+                <option value="{{ s.id_societe }}" {{ 'selected' if personnel and personnel.id_societe == s.id_societe else '' }}>
+                    {{ s.raison_sociale }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div id="bloc-employe" class="bloc-employe">
+        <hr>
+        <h3>Fiche employé</h3>
+        <p class="info">Ces informations sont automatiquement liées au compte utilisateur.</p>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Matricule *</label>
+                <input type="text" name="matricule" value="{{ employe.matricule if employe else '' }}" required>
+            </div>
+            <div class="form-group">
+                <label>Téléphone</label>
+                <input type="tel" name="telephone" value="{{ employe.telephone if employe else '' }}">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Date d'embauche *</label>
+                <input type="date" name="date_embauche" value="{{ employe.date_embauche if employe else '' }}" required>
+            </div>
+            <div class="form-group">
+                <label>Poste</label>
+                <input type="text" name="poste" value="{{ employe.poste if employe else '' }}">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Grade</label>
+                <input type="text" name="grade" value="{{ employe.grade if employe else '' }}">
+            </div>
+            <div class="form-group">
+                <label>Salaire de base (MAD) *</label>
+                <input type="number" step="0.01" name="salaire_base" value="{{ employe.salaire_base if employe else '' }}" required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>RIB</label>
+                <input type="text" name="rib" value="{{ employe.rib if employe else '' }}">
+            </div>
+            <div class="form-group">
+                <label>Personnes à charge</label>
+                <input type="number" name="nb_personnes_a_charge" value="{{ employe.nb_personnes_a_charge if employe else 0 }}" min="0">
+            </div>
+        </div>
+    </div>
+
+    <button type="submit" class="btn">{{ 'Enregistrer' if personnel else 'Créer' }}</button>
+</form>
+
+<script>
+function toggleChamps() {
+    var role = document.getElementById('role').value;
+    var estSuperAdmin = (role === 'super_admin');
+    
+    document.getElementById('bloc-societe').style.display = estSuperAdmin ? 'none' : 'block';
+    document.getElementById('bloc-employe').style.display = estSuperAdmin ? 'none' : 'block';
+}
+window.onload = toggleChamps;
+</script>
+{% endblock %}

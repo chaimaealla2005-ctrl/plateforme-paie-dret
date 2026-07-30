@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block titre %}Mes bulletins{% endblock %}
+{% block contenu %}
+
+<div class="page-header">
+    <div>
+        <h1>Mes bulletins de paie</h1>
+        <p class="sous-titre">{{ employe.prenom }} {{ employe.nom }}</p>
+    </div>
+</div>
+
+<div class="card">
+    {% if bulletins %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Période</th>
+                    <th>Salaire brut</th>
+                    <th>Net à payer</th>
+                    <th>Date génération</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in bulletins %}
+                <tr>
+                    <td>{{ b.mois }}/{{ b.annee }}</td>
+                    <td>{{ b.salaire_brut }} MAD</td>
+                    <td><strong>{{ b.salaire_net_a_payer }} MAD</strong></td>
+                    <td>{{ b.date_generation[:10] if b.date_generation else '-' }}</td>
+                    <td class="text-center">
+                        <a href="{{ url_for('bulletin.mon_bulletin_detail', id_bulletin=b.id_bulletin) }}" class="btn btn-petit btn-modifier">Voir le détail</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="text-align:center;padding:30px;color:#999;">
+        Aucun bulletin de paie n'a encore été généré.
+    </p>
+    {% endif %}
+</div>
+
+<div style="margin-top:12px;">
+    <a href="{{ url_for('employe.profil') }}" class="btn btn-outline">Retour à mon profil</a>
+</div>
+
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block titre %}Bulletin de paie{% endblock %}
+{% block contenu %}
+<h1>Bulletin de paie — {{ employe.prenom }} {{ employe.nom }}</h1>
+<p>Période : <strong>{{ bulletin.mois }}/{{ bulletin.annee }}</strong></p>
+
+<table>
+    <tr><th>Élément</th><th>Montant (MAD)</th></tr>
+    <tr><td>Salaire de base</td><td>{{ "%.2f"|format(bulletin.salaire_base) }}</td></tr>
+
+    {% for l in lignes %}
+    <tr><td>{{ l.libelle }}</td><td>+ {{ "%.2f"|format(l.montant) }}</td></tr>
+    {% endfor %}
+
+    <tr class="ligne-total">
+        <td><strong>Salaire brut</strong></td>
+        <td><strong>{{ "%.2f"|format(bulletin.salaire_brut) }}</strong></td>
+    </tr>
+    <tr><td>Cotisation CNSS</td><td>− {{ "%.2f"|format(bulletin.total_cnss) }}</td></tr>
+    <tr><td>Cotisation AMO</td><td>− {{ "%.2f"|format(bulletin.total_amo) }}</td></tr>
+    <tr><td>Salaire net imposable</td><td>{{ "%.2f"|format(bulletin.salaire_net_imposable) }}</td></tr>
+    <tr><td>Impôt sur le revenu (IR)</td><td>− {{ "%.2f"|format(bulletin.total_ir) }}</td></tr>
+
+    <tr class="ligne-net">
+        <td><strong>NET À PAYER</strong></td>
+        <td><strong>{{ "%.2f"|format(bulletin.salaire_net_a_payer) }} MAD</strong></td>
+    </tr>
+</table>
+
+    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+        <a href="{{ url_for('bulletin.pdf_bulletin', id_bulletin=bulletin.id_bulletin) }}" 
+        class="btn btn-primary" target="_blank">
+        📄 Télécharger en PDF
+        </a>
+        <a href="{{ url_for('bulletin.liste_bulletins') }}" class="btn btn-outline">Retour à la liste</a>
+
+{% endblock %}

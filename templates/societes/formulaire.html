@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block titre %}{{ 'Modifier' if societe else 'Nouvelle' }} société{% endblock %}
+{% block contenu %}
+
+<h1>{{ 'Modifier la société' if societe else 'Nouvelle société' }}</h1>
+
+<div class="card">
+    <form method="post">
+        <!-- Informations générales -->
+        <div class="form-group">
+            <label>Raison sociale *</label>
+            <input type="text" name="raison_sociale" value="{{ societe.raison_sociale if societe else '' }}" class="form-control" required>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label>ICE</label>
+                <input type="text" name="ice" value="{{ societe.ice if societe else '' }}" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Adresse</label>
+                <input type="text" name="adresse" value="{{ societe.adresse if societe else '' }}" class="form-control">
+            </div>
+        </div>
+        
+        <hr>
+        
+        <!-- Mentions légales pour le bulletin -->
+        <h3>Informations pour le bulletin de paie</h3>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label>CNSS Employeur</label>
+                <input type="text" name="cnss" value="{{ societe.cnss if societe else '' }}" class="form-control" placeholder="Numéro CNSS de la société">
+            </div>
+            <div class="form-group">
+                <label>RC (Registre de Commerce)</label>
+                <input type="text" name="rc" value="{{ societe.rc if societe else '' }}" class="form-control" placeholder="Numéro du Registre de Commerce">
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label>Mode de paiement</label>
+            <select name="mode_paiement" class="form-control">
+                <option value="Virement bancaire" {{ 'selected' if societe and societe.mode_paiement == 'Virement bancaire' else '' }}>Virement bancaire</option>
+                <option value="Chèque" {{ 'selected' if societe and societe.mode_paiement == 'Chèque' else '' }}>Chèque</option>
+                <option value="Espèces" {{ 'selected' if societe and societe.mode_paiement == 'Espèces' else '' }}>Espèces</option>
+                <option value="Virement bancaire / Chèque" {{ 'selected' if societe and societe.mode_paiement == 'Virement bancaire / Chèque' else '' }}>Virement bancaire / Chèque</option>
+                <option value="Autre" {{ 'selected' if societe and societe.mode_paiement == 'Autre' else '' }}>Autre</option>
+            </select>
+            <small style="color:#888;">Mode de paiement qui apparaîtra sur les bulletins de paie</small>
+        </div>
+
+
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-success">Enregistrer</button>
+            <a href="{{ url_for('societe.liste_societes') }}" class="btn btn-danger">Annuler</a>
+        </div>
+    </form>
+</div>
+
+<script>
+document.querySelector('input[name="logo"]').addEventListener('change', function() {
+    var file = this.files[0];
+    if (file) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            // Supprimer l'ancienne prévisualisation
+            var oldPreview = document.querySelector('.logo-preview');
+            if (oldPreview) {
+                oldPreview.remove();
+            }
+            // Créer la nouvelle prévisualisation
+            var preview = document.createElement('div');
+            preview.className = 'logo-preview';
+            preview.innerHTML = '<img src="'+ e.target.result +'" alt="Logo" style="max-width:150px; max-height:80px; border:1px solid #ddd; padding:5px; margin-top:10px;">';
+            document.querySelector('.logo-upload').appendChild(preview);
+        }
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+{% endblock %}

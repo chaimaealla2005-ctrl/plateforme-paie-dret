@@ -1,0 +1,64 @@
+<!-- templates/components/pagination.html -->
+{% if pagination and pagination.total_pages > 1 %}
+
+<div class="pagination-container">
+    <div class="pagination-info">
+        Affichage de <strong>{{ pagination.start + 1 if pagination.total > 0 else 0 }}</strong> à 
+        <strong>{{ pagination.start + pagination.current_items|length }}</strong> 
+        sur <strong>{{ pagination.total }}</strong> éléments
+    </div>
+    
+    <div class="pagination">
+        <!-- Page précédente -->
+        {% if pagination.has_prev() %}
+            {# Créer un dictionnaire avec les paramètres sans la clé 'page' #}
+            {% set params = request.args.to_dict() %}
+            {% set _ = params.pop('page', None) %}
+            <a href="{{ url_for(request.endpoint, page=pagination.prev_page(), **params) }}" 
+               class="pagination-link" aria-label="Précédent">
+                « Précédent
+            </a>
+        {% else %}
+            <span class="pagination-link disabled">« Précédent</span>
+        {% endif %}
+        
+        <!-- Numéros de pages -->
+        {% for p in pagination.iter_pages() %}
+            {% if p is none %}
+                <span class="pagination-link disabled">…</span>
+            {% elif p == pagination.page %}
+                <span class="pagination-link active">{{ p }}</span>
+            {% else %}
+                {% set params = request.args.to_dict() %}
+                {% set _ = params.pop('page', None) %}
+                <a href="{{ url_for(request.endpoint, page=p, **params) }}" 
+                   class="pagination-link">{{ p }}</a>
+            {% endif %}
+        {% endfor %}
+        
+        <!-- Page suivante -->
+        {% if pagination.has_next() %}
+            {% set params = request.args.to_dict() %}
+            {% set _ = params.pop('page', None) %}
+            <a href="{{ url_for(request.endpoint, page=pagination.next_page(), **params) }}" 
+               class="pagination-link" aria-label="Suivant">
+                Suivant »
+            </a>
+        {% else %}
+            <span class="pagination-link disabled">Suivant »</span>
+        {% endif %}
+    </div>
+    
+    <!-- Sélecteur d'éléments par page -->
+    <div class="pagination-per-page">
+        <label>Afficher :</label>
+        <select onchange="window.location.href='{{ url_for(request.endpoint, page=1, per_page='') }}'+this.value">
+            <option value="10" {% if request.args.get('per_page', 20)|int == 10 %}selected{% endif %}>10</option>
+            <option value="20" {% if request.args.get('per_page', 20)|int == 20 %}selected{% endif %}>20</option>
+            <option value="50" {% if request.args.get('per_page', 20)|int == 50 %}selected{% endif %}>50</option>
+            <option value="100" {% if request.args.get('per_page', 20)|int == 100 %}selected{% endif %}>100</option>
+        </select>
+    </div>
+</div>
+
+{% endif %}

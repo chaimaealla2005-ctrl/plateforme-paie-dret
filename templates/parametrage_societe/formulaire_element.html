@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block titre %}Nouvel élément personnalisé{% endblock %}
+{% block contenu %}
+
+<div class="page-header">
+    <div>
+        <h1>Nouvel élément personnalisé</h1>
+        <p class="sous-titre">Ajouter un élément de paie spécifique à votre société</p>
+    </div>
+</div>
+
+<div class="card">
+    <form method="post">
+        <div class="form-row">
+            <div class="form-group">
+                <label>Code *</label>
+                <input type="text" name="code" class="form-control" required>
+                <small style="color:#888;">Ex: IND_SPECIAL, PRIME_OBJ</small>
+            </div>
+            <div class="form-group">
+                <label>Libellé *</label>
+                <input type="text" name="libelle" class="form-control" required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Type *</label>
+                <select name="type_element" class="form-control" required>
+                    <option value="prime">Prime</option>
+                    <option value="indemnite">Indemnité</option>
+                    <option value="retenue">Retenue</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Mode de calcul *</label>
+                <select name="mode_calcul" class="form-control" required>
+                    <option value="montant_fixe">Montant fixe</option>
+                    <option value="pourcentage_base">Pourcentage du salaire de base</option>
+                    <option value="bareme_anciennete">Barème par ancienneté</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Valeur</label>
+                <input type="number" step="0.01" name="valeur" class="form-control" placeholder="Laisser vide si barème">
+            </div>
+            <div class="form-group">
+                <label>Plafond d'exonération</label>
+                <input type="number" step="0.01" name="plafond_exoneration" class="form-control" placeholder="Laisser vide si aucun">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="soumis_cnss" checked>
+                    Soumis à la CNSS
+                </label>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="soumis_ir" checked>
+                    Soumis à l'IR
+                </label>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-success">Ajouter</button>
+            <a href="{{ url_for('parametrage_societe.vue_ensemble') }}" class="btn btn-danger">Annuler</a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

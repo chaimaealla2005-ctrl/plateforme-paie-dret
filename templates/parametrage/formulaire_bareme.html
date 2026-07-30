@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block titre %}Modifier le barème{% endblock %}
+{% block contenu %}
+<h1>Modifier le barème — {{ bareme.code }}</h1>
+<form method="post">
+    <label>Taux salarié (%)</label>
+    <input type="number" step="0.01" name="taux_salarial" value="{{ bareme.taux_salarial }}" required>
+
+    <label>Taux patronal (%)</label>
+    <input type="number" step="0.01" name="taux_patronal" value="{{ bareme.taux_patronal or '' }}">
+
+    <label>Plafond mensuel (MAD, laisser vide si aucun)</label>
+    <input type="number" step="0.01" name="plafond_mensuel" value="{{ bareme.plafond_mensuel or '' }}">
+
+    <button type="submit" class="btn">Enregistrer (s'applique à toutes les sociétés)</button>
+</form>
+{% endblock %}

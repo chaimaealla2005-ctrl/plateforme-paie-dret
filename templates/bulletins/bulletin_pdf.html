@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Bulletin de paie</title>
+    <style>
+        /* ============================================
+           STYLE POUR LE PDF - Conforme à la loi marocaine
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 11px;
+            color: #1a2332;
+            padding: 30px 40px;
+            background: white;
+        }
+        
+        .bulletin-container {
+            max-width: 800px;
+            margin: 0 auto;
+            border: 1px solid #d0d7df;
+            padding: 25px 30px;
+            border-radius: 6px;
+        }
+        
+        /* ============================================
+           EN-TÊTE - Identification de l'employeur
+           ============================================ */
+        .header {
+            text-align: center;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #1f3864;
+            margin-bottom: 16px;
+        }
+        
+        .header .employeur-nom {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f3864;
+            letter-spacing: 0.5px;
+        }
+        
+        .header .employeur-adresse {
+            font-size: 11px;
+            color: #555;
+            margin-top: 2px;
+        }
+        
+        .header .employeur-identifiants {
+            font-size: 10px;
+            color: #777;
+            margin-top: 4px;
+        }
+        
+        .header .bulletin-titre {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f3864;
+            margin-top: 8px;
+        }
+        
+        .header .bulletin-periode {
+            font-size: 12px;
+            color: #555;
+        }
+        
+        /* ============================================
+           IDENTIFICATION DU SALARIÉ
+           ============================================ */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 4px 20px;
+            margin-bottom: 14px;
+            padding: 10px 14px;
+            background: #f7f8fa;
+            border-radius: 4px;
+            font-size: 10.5px;
+        }
+        
+        .info-grid .label {
+            color: #6b7a8f;
+            font-weight: 500;
+        }
+        
+        .info-grid .value {
+            color: #1a2332;
+            font-weight: 500;
+        }
+        
+        /* ============================================
+           PÉRIODE ET TEMPS DE TRAVAIL
+           ============================================ */
+        .temps-travail {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 4px 20px;
+            margin-bottom: 14px;
+            padding: 8px 14px;
+            background: #f7f8fa;
+            border-radius: 4px;
+            font-size: 10.5px;
+        }
+        
+        .temps-travail .label {
+            color: #6b7a8f;
+            font-weight: 500;
+        }
+        
+        /* ============================================
+           TABLEAU DES ÉLÉMENTS DE RÉMUNÉRATION
+           ============================================ */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 10.5px;
+        }
+        
+        table thead th {
+            background: #1f3864;
+            color: white;
+            padding: 6px 10px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 9.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        
+        table thead th.text-right {
+            text-align: right;
+        }
+        
+        table tbody td {
+            padding: 5px 10px;
+            border-bottom: 1px solid #eef2f6;
+        }
+        
+        table tbody tr:nth-child(even) {
+            background: #f7f8fa;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .amount-positive {
+            color: #1a6e34;
+        }
+        
+        .amount-negative {
+            color: #a8323a;
+        }
+        
+        /* ============================================
+           TOTAUX
+           ============================================ */
+        .totaux {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 2px solid #1f3864;
+        }
+        
+        .totaux-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px 20px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        
+        .totaux-grid .label {
+            color: #555;
+        }
+        
+        .totaux-grid .value {
+            font-weight: 600;
+        }
+        
+        .totaux-grid .net {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f3864;
+        }
+        
+        /* ============================================
+           MENTIONS OBLIGATOIRES (bas du bulletin)
+           ============================================ */
+        .mentions-legales {
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid #d0d7df;
+            font-size: 8.5px;
+            color: #888;
+            line-height: 1.5;
+        }
+        
+        .mentions-legales .mode-paiement {
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .mentions-legales .footer {
+            margin-top: 6px;
+            text-align: center;
+            font-size: 8px;
+            color: #aaa;
+        }
+        
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media print {
+            body { padding: 20px; }
+            .bulletin-container { border: none; padding: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bulletin-container">
+        
+        <!-- ==========================================
+        1. IDENTIFICATION DE L'EMPLOYEUR
+        ========================================== -->
+        <div class="header">
+            <div class="employeur-nom">{{ employeur.raison_sociale or 'DIRECTION RÉGIONALE DE L\'ÉQUIPEMENT ET DU TRANSPORT' }}</div>
+            <div class="employeur-adresse">{{ employeur.adresse or 'Oriental, Maroc' }}</div>
+            <div class="employeur-identifiants">
+                CNSS : {{ employeur.cnss or '123456789' }} &nbsp;|&nbsp; RC : {{ employeur.rc or '123456' }}
+            </div>
+            <div class="bulletin-titre">BULLETIN DE PAIE</div>
+            <div class="bulletin-periode">Période du {{ bulletin.mois }}/{{ bulletin.annee }}</div>
+        </div>
+        
+        <!-- ==========================================
+        2. IDENTIFICATION DU SALARIÉ
+        ========================================== -->
+        <div class="info-grid">
+            <div><span class="label">Matricule :</span> <span class="value">{{ employe.matricule or '-' }}</span></div>
+            <div><span class="label">Nom :</span> <span class="value">{{ employe.prenom }} {{ employe.nom }}</span></div>
+            <div><span class="label">CIN :</span> <span class="value">{{ employe.cin or '-' }}</span></div>
+            <div><span class="label">CNSS :</span> <span class="value">{{ employe.cnss_numero or '-' }}</span></div>
+            <div><span class="label">Poste :</span> <span class="value">{{ employe.poste or '-' }}</span></div>
+            <div><span class="label">Date d'entrée :</span> <span class="value">{{ employe.date_embauche if employe.date_embauche else '-' }}</span></div>
+        </div>
+        
+        <!-- ==========================================
+        3. PÉRIODE ET TEMPS DE TRAVAIL
+        ========================================== -->
+        <div class="temps-travail">
+            <div><span class="label">Période :</span> <span class="value">{{ bulletin.mois }}/{{ bulletin.annee }}</span></div>
+            <div><span class="label">Jours travaillés :</span> <span class="value">{{ employe.jours_travailles or '26' }}</span></div>
+            <div><span class="label">Heures supplémentaires :</span> <span class="value">{{ employe.heures_sup or '0' }}</span></div>
+        </div>
+        
+        <!-- ==========================================
+        4. ÉLÉMENTS DE RÉMUNÉRATION (GAINS)
+        5. RETENUES
+        ========================================== -->
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:60%;">Libellé</th>
+                    <th style="width:20%;" class="text-right">Montant (MAD)</th>
+                    <th style="width:20%;" class="text-center">Exonéré</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Lignes des gains (type_ligne = 'gain') -->
+                {% for ligne in lignes if ligne.type_ligne == 'gain' %}
+                <tr>
+                    <td>{{ ligne.libelle }}</td>
+                    <td class="text-right amount-positive">{{ "%.2f"|format(ligne.montant) }}</td>
+                    <td class="text-center">
+                        {% if ligne.libelle in ['Indemnité de transport', 'Indemnité de représentation', 'Indemnité de panier / restauration', 'Indemnité de caisse', 'Indemnité de salissure'] %}
+                            Oui
+                        {% else %}
+                            Non
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                
+                <!-- Lignes des cotisations (type_ligne = 'cotisation') -->
+                {% for ligne in lignes if ligne.type_ligne == 'cotisation' %}
+                <tr>
+                    <td>{{ ligne.libelle }}</td>
+                    <td class="text-right amount-negative">{{ "%.2f"|format(ligne.montant) }}</td>
+                    <td class="text-center">—</td>
+                </tr>
+                {% endfor %}
+                
+                <!-- Lignes des impôts (type_ligne = 'impot') -->
+                {% for ligne in lignes if ligne.type_ligne == 'impot' %}
+                <tr>
+                    <td>{{ ligne.libelle }}</td>
+                    <td class="text-right amount-negative">{{ "%.2f"|format(ligne.montant) }}</td>
+                    <td class="text-center">—</td>
+                </tr>
+                {% endfor %}
+                
+                <!-- Retenues diverses -->
+                {% for ligne in lignes if ligne.type_ligne == 'retenue' %}
+                <tr>
+                    <td>{{ ligne.libelle }}</td>
+                    <td class="text-right amount-negative">{{ "%.2f"|format(ligne.montant) }}</td>
+                    <td class="text-center">—</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <!-- ==========================================
+        6. TOTAUX
+        ========================================== -->
+        <div class="totaux">
+            <div class="totaux-grid">
+                <div>
+                    <span class="label">Rémunération brute :</span>
+                    <span class="value">{{ "%.2f"|format(bulletin.salaire_brut) }} MAD</span>
+                </div>
+                <div>
+                    <span class="label">Total des retenues :</span>
+                    <span class="value">{{ "%.2f"|format(bulletin.total_cnss + bulletin.total_amo + bulletin.total_ir) }} MAD</span>
+                </div>
+                <div>
+                    <span class="label">Salaire net imposable :</span>
+                    <span class="value">{{ "%.2f"|format(bulletin.salaire_net_imposable) }} MAD</span>
+                </div>
+                <div style="grid-column: span 3; text-align: center; padding-top: 8px; border-top: 1px solid #e8ecf0;">
+                    <span class="label" style="font-size:14px;">Salaire net à payer :</span>
+                    <span class="net">{{ "%.2f"|format(bulletin.salaire_net_a_payer) }} MAD</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ==========================================
+        MENTIONS OBLIGATOIRES (bas du bulletin)
+        ========================================== -->
+        <div class="mentions-legales">
+            <div>
+                <span class="mode-paiement">Mode de paiement :</span> Virement bancaire / Chèque
+            </div>
+            <div style="margin-top:4px;">
+                <span class="mode-paiement">Solde des congés :</span> {{ employe.solde_conges or '0' }} jours restants
+            </div>
+            <div style="margin-top:6px; font-size:8px; color:#aaa;">
+                Bulletin conforme à l'arrêté n° 346-05 du 9 février 2005 (BORM n° 5540)
+            </div>
+            <div class="footer">
+                DRET Oriental · Généré le {{ bulletin.date_generation[:10] if bulletin.date_generation else 'date inconnue' }}
+            </div>
+        </div>
+        
+    </div>
+</body>
+</html>

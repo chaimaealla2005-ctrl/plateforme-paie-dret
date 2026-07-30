@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block titre %}Sociétés{% endblock %}
+{% block contenu %}
+
+<div class="entete-liste">
+    <h1>Sociétés</h1>
+    <a class="btn" href="{{ url_for('societe.nouvelle_societe') }}">+ Nouvelle société</a>
+</div>
+
+<!-- Statistiques compactes -->
+<div class="stats-mini">
+    <div class="stat-item">
+        <span class="stat-nb">{{ stats.total }}</span>
+        <span class="stat-label">Total</span>
+    </div>
+    <div class="stat-item stat-actif">
+        <span class="stat-nb">{{ stats.actives }}</span>
+        <span class="stat-label">Actives</span>
+    </div>
+    <div class="stat-item stat-inactif">
+        <span class="stat-nb">{{ stats.inactives }}</span>
+        <span class="stat-label">Inactives</span>
+    </div>
+</div>
+
+<!-- Filtres style "Filtrer par..." -->
+<div class="filtres-barre">
+    <form method="get" action="{{ url_for('societe.liste_societes') }}" class="form-filtres" style="display: contents;">
+        
+        <!-- Filtre Recherche -->
+        <div class="filtre-item">
+            <span class="filtre-label">Recherche :</span>
+            <input type="text" name="recherche" value="{{ filtre_recherche }}" 
+                   placeholder="Raison sociale ou ICE...">
+        </div>
+        
+        <!-- Filtre Statut -->
+        <div class="filtre-item">
+            <span class="filtre-label">Statut :</span>
+            <select name="statut">
+                <option value="tous" {{ 'selected' if filtre_statut == 'tous' else '' }}>Tous</option>
+                <option value="actif" {{ 'selected' if filtre_statut == 'actif' else '' }}>Actives</option>
+                <option value="inactif" {{ 'selected' if filtre_statut == 'inactif' else '' }}>Inactives</option>
+            </select>
+        </div>
+        
+        <!-- Filtre Employés -->
+        <div class="filtre-item">
+            <span class="filtre-label">Employés :</span>
+            <input type="number" name="employes_min" value="{{ filtre_employes_min }}" 
+                   placeholder="Min" style="width:55px;" min="0">
+            <span style="color:#aaa; font-size:12px;">à</span>
+            <input type="number" name="employes_max" value="{{ filtre_employes_max }}" 
+                   placeholder="Max" style="width:55px;" min="0">
+        </div>
+        
+        <!-- Actions -->
+        <div class="filtre-actions">
+            <button type="submit" class="btn-filtre">Filtrer</button>
+            <a href="{{ url_for('societe.liste_societes') }}" class="btn-annuler">Réinitialiser</a>
+        </div>
+        
+    </form>
+</div>
+
+<!-- Résultats -->
+<div class="resultats-info">
+    {{ societes|length }} société(s) trouvée(s)
+</div>
+{% include "components/pagination.html" %}
+<table>
+    <thead>
+        <tr>
+            <th>Raison sociale</th>
+            <th>ICE</th>
+            <th style="text-align: center;">Employés</th>
+            <th style="text-align: center;">Utilisateurs</th>
+            <th>Statut</th>
+            <th style="text-align: center;">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in societes %}
+        <tr>
+            <td><strong>{{ s.raison_sociale }}</strong></td>
+            <td>{{ s.ice if s.ice else '—' }}</td>
+            <td style="text-align: center;">{{ s.nb_employes }}</td>
+            <td style="text-align: center;">{{ s.nb_utilisateurs }}</td>
+            <td>
+                <span class="badge badge-{{ 'active' if s.actif else 'inactive' }}">
+                    {{ 'Active' if s.actif else 'Inactive' }}
+                </span>
+            </td>
+            <td style="text-align: center;">
+                <div class="actions">
+                    <a href="{{ url_for('societe.modifier_societe', id_societe=s.id_societe) }}" 
+                       class="btn btn-petit btn-modifier">Modifier</a>
+                    
+                    <form method="post" 
+                          action="{{ url_for('societe.toggle_actif_societe', id_societe=s.id_societe) }}" 
+                          class="form-action-inline">
+                        <button type="submit" class="btn btn-petit btn-{{ 'desactiver' if s.actif else 'activer' }}">
+                            {{ 'Désactiver' if s.actif else 'Activer' }}
+                        </button>
+                    </form>
+                    
+                    <form method="post" 
+                          action="{{ url_for('societe.supprimer_societe', id_societe=s.id_societe) }}"
+                          class="form-action-inline"
+                          onsubmit="return confirm('Supprimer définitivement cette société et TOUTES ses données ?');">
+                        <button type="submit" class="btn btn-petit btn-supprimer">Supprimer</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="6" style="text-align: center; padding: 30px; color: var(--grey);">
+                Aucune société trouvée.
+                {% if filtre_recherche or filtre_statut != 'tous' or filtre_employes_min or filtre_employes_max %}
+                    <br><small style="color: #aaa;">Essayez de modifier vos filtres.</small>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="page-header">
+    <div>
+        <h1>Sociétés</h1>
+        <p class="sous-titre">Gestion des sociétés</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('societe.nouvelle_societe') }}" class="btn btn-success">+ Nouvelle société</a>
+        <div class="dropdown">
+            <button class="btn btn-info dropdown-toggle">📊 Exporter</button>
+            <div class="dropdown-content">
+                <a href="{{ url_for('societe.export_societes_csv', format='csv') }}">CSV</a>
+                <a href="{{ url_for('societe.export_societes_csv', format='excel') }}">Excel</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

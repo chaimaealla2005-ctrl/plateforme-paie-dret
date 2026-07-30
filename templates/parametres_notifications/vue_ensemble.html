@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block titre %}Paramètres de notification{% endblock %}
+{% block contenu %}
+
+<div class="page-header">
+    <div>
+        <h1>📧 Paramètres de notification</h1>
+        <p class="sous-titre">Configuration de l'envoi d'emails</p>
+    </div>
+</div>
+
+<div class="info-banner">
+    <span class="info-icon">ℹ️</span>
+    <span>
+        Ces paramètres permettent d'envoyer des notifications par email.
+        Pour utiliser Gmail, créez un <strong>mot de passe d'application</strong> 
+        dans votre compte Google (Sécurité → Mot de passe d'application).
+    </span>
+</div>
+
+<div class="card">
+    <form method="post" action="{{ url_for('notification_parametres.modifier') }}">
+        {% for p in parametres %}
+        <div class="form-group">
+            <label for="param_{{ p.code }}">
+                {{ p.description or p.code }}
+                {% if p.code == 'SMTP_MOT_DE_PASSE' %}
+                    <span style="color:#888;font-weight:normal;font-size:12px;">(caché)</span>
+                {% endif %}
+            </label>
+            {% if p.code == 'ACTIVER_NOTIFICATIONS' %}
+                <select name="param_{{ p.code }}" class="form-control">
+                    <option value="1" {{ 'selected' if p.valeur == '1' else '' }}>✅ Activé</option>
+                    <option value="0" {{ 'selected' if p.valeur == '0' else '' }}>❌ Désactivé</option>
+                </select>
+            {% else %}
+                <input type="{{ 'password' if p.code == 'SMTP_MOT_DE_PASSE' else 'text' }}" 
+                       name="param_{{ p.code }}" 
+                       value="{{ p.valeur }}" 
+                       class="form-control"
+                       placeholder="{{ p.description or p.code }}">
+            {% endif %}
+            <small style="color:#888;">
+                {% if p.code == 'SMTP_SERVEUR' %}Ex: smtp.gmail.com (Gmail), smtp.office365.com (Outlook){% endif %}
+                {% if p.code == 'SMTP_PORT' %}Port : 587 (TLS) ou 465 (SSL){% endif %}
+                {% if p.code == 'SMTP_EMAIL' %}L'email depuis lequel les notifications seront envoyées{% endif %}
+                {% if p.code == 'SMTP_MOT_DE_PASSE' %}Mot de passe d'application (ne partagez pas votre mot de passe){% endif %}
+                {% if p.code == 'NOM_EXPEDITEUR' %}Nom affiché dans les emails reçus{% endif %}
+                {% if p.code == 'ACTIVER_NOTIFICATIONS' %}Activer ou désactiver l'envoi d'emails{% endif %}
+            </small>
+        </div>
+        {% endfor %}
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-success">💾 Enregistrer les paramètres</button>
+            <a href="{{ url_for('dashboard.tableau_de_bord') }}" class="btn btn-danger">Annuler</a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block titre %}Modifier les tranches IR{% endblock %}
+{% block contenu %}
+
+<div class="entete-liste">
+    <div>
+        <h1>Modifier le barème de l'Impôt sur le Revenu</h1>
+        <p class="sous-titre">Modifiez les tranches IR pour l'année en cours. Ces valeurs s'appliquent à toutes les sociétés.</p>
+    </div>
+</div>
+
+<div class="info-banner">
+    <span class="info-icon">ℹ️</span>
+    <span>Les tranches IR sont exprimées en <strong>valeurs annuelles</strong>. La modification est immédiate pour tous les bulletins futurs.</span>
+</div>
+
+<div class="carte-parametrage">
+    <div class="carte-header">
+        <h2>Tranches IR</h2>
+        <span class="badge badge-legal">Modifiable</span>
+    </div>
+    
+    <form method="post" action="{{ url_for('parametrage.modifier_tranches_ir') }}">
+        <div class="table-wrapper">
+            <table class="table-parametres">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Seuil bas (MAD)</th>
+                        <th>Seuil haut (MAD)</th>
+                        <th>Taux (%)</th>
+                        <th>Somme à déduire (MAD)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in tranches %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>
+                            <input type="number" step="0.01" name="seuil_bas_{{ t.id_tranche }}" 
+                                   value="{{ t.seuil_bas }}" class="input-modif">
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" name="seuil_haut_{{ t.id_tranche }}" 
+                                   value="{{ t.seuil_haut if t.seuil_haut else '' }}" class="input-modif" 
+                                   placeholder="Illimité">
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" name="taux_{{ t.id_tranche }}" 
+                                   value="{{ t.taux }}" class="input-modif">
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" name="somme_a_deduire_{{ t.id_tranche }}" 
+                                   value="{{ t.somme_a_deduire }}" class="input-modif">
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="carte-footer">
+            <button type="submit" class="btn btn-modifier">💾 Enregistrer les modifications</button>
+            <a href="{{ url_for('parametrage.vue_ensemble') }}" class="btn btn-annuler">Annuler</a>
+        </div>
+    </form>
+</div>
+
+<!-- Exemple de calcul -->
+<div class="carte-parametrage">
+    <div class="carte-header">
+        <h2>Exemple de calcul</h2>
+    </div>
+    <div class="info-banner" style="background: #f7f8fa; border-left-color: var(--blue);">
+        <span class="info-icon">📊</span>
+        <span>
+            <strong>Formule :</strong> IR = (Revenu net imposable annuel × Taux) − Somme à déduire
+            <br><small>Exemple : pour un revenu de 80 000 MAD/an, l'impôt est calculé sur la tranche correspondante.</small>
+        </span>
+    </div>
+</div>
+
+{% endblock %}

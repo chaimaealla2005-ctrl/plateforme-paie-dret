@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block titre %}Connexion{% endblock %}
+{% block contenu %}
+<div class="card card-centree">
+    <h1>Connexion</h1>
+    <form method="post">
+        <label>Email</label>
+        <input type="email" name="email" required autofocus>
+
+        <label>Mot de passe</label>
+        <input type="password" name="mot_de_passe" required>
+
+        <button type="submit" class="btn">Se connecter</button>
+    </form>
+
+    <div class="comptes-demo">
+        <p><strong>Comptes de démonstration :</strong></p>
+        <ul>
+            <li>super.admin@plateforme.ma / admin123 (super-admin)</li>
+            <li>admin@dret-demo.ma / admin123 (admin société)</li>
+            <li>rh@dret-demo.ma / rh123 (RH)</li>
+            <li>comptable@dret-demo.ma / compta123 (comptable)</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

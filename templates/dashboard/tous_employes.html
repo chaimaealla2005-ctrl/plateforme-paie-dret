@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block titre %}Tous les employés{% endblock %}
+{% block contenu %}
+<h1>Tous les employés (toutes sociétés)</h1>
+<table>
+    <tr><th>Société</th><th>Matricule</th><th>Nom</th><th>Poste</th><th>Salaire de base</th></tr>
+    {% for e in employes %}
+    <tr>
+        <td>{{ e.raison_sociale }}</td>
+        <td>{{ e.matricule }}</td>
+        <td>{{ e.prenom }} {{ e.nom }}</td>
+        <td>{{ e.poste }}</td>
+        <td>{{ e.salaire_base }} MAD</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5">Aucun employé pour le moment.</td></tr>
+    {% endfor %}
+</table>
+{% endblock %}

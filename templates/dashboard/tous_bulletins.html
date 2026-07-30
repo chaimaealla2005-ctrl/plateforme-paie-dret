@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block titre %}Tous les bulletins{% endblock %}
+{% block contenu %}
+<h1>Tous les bulletins (toutes sociétés)</h1>
+<table>
+    <tr><th>Société</th><th>Employé</th><th>Période</th><th>Net à payer</th></tr>
+    {% for b in bulletins %}
+    <tr>
+        <td>{{ b.raison_sociale }}</td>
+        <td>{{ b.prenom }} {{ b.nom }}</td>
+        <td>{{ b.mois }}/{{ b.annee }}</td>
+        <td>{{ "%.2f"|format(b.salaire_net_a_payer) }} MAD</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4">Aucun bulletin généré pour le moment.</td></tr>
+    {% endfor %}
+</table>
+{% endblock %}

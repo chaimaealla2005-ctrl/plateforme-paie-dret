@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block titre %}Détail de mon bulletin{% endblock %}
+{% block contenu %}
+
+<div class="bulletin-container" style="max-width: 900px; margin: 0 auto; background: #ffffff; border-radius: 10px; padding: 30px; border: 1px solid #e8ecf0; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+    <div style="text-align: center; padding-bottom: 24px; border-bottom: 2px solid var(--navy); margin-bottom: 24px;">
+        <h2 style="font-size: 1.4rem; font-weight: 600; color: var(--navy);">Bulletin de paie</h2>
+        <div style="color: #6b7a8f; font-size: 0.9rem;">
+            {{ employe.prenom }} {{ employe.nom }} - {{ bulletin.mois }}/{{ bulletin.annee }}
+        </div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px 32px; margin-bottom: 20px; font-size: 0.9rem;">
+        <div><span style="color: #6b7a8f;">Matricule :</span> {{ employe.matricule or '-' }}</div>
+        <div><span style="color: #6b7a8f;">Poste :</span> {{ employe.poste or '-' }}</div>
+        <div><span style="color: #6b7a8f;">Date d'embauche :</span> {{ employe.date_embauche if employe.date_embauche else '-' }}</div>
+        <div><span style="color: #6b7a8f;">Société :</span> {{ employe.raison_sociale if employe.raison_sociale else '-' }}</div>
+    </div>
+    
+    <hr>
+    
+    <table style="width: 100%; margin: 16px 0; border-collapse: collapse;">
+        <thead>
+            <tr>
+                <th style="padding: 8px 4px; border-bottom: 1px solid #ddd; text-align: left; font-size: 0.9rem;">Libellé</th>
+                <th style="padding: 8px 4px; border-bottom: 1px solid #ddd; text-align: right; font-size: 0.9rem;">Montant (MAD)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if lignes %}
+                {% for ligne in lignes %}
+                <tr>
+                    <td style="padding: 8px 4px; border-bottom: 1px solid #eee;">{{ ligne.libelle }}</td>
+                    <td style="padding: 8px 4px; border-bottom: 1px solid #eee; text-align: right; 
+                        {% if ligne.montant < 0 %}color: #a8323a;{% else %}color: #1a6e34;{% endif %}">
+                        {{ "%.2f"|format(ligne.montant) }}
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="2" style="text-align:center;padding:20px;color:#999;">Aucune ligne détaillée disponible.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+        <tfoot>
+            <tr style="border-top: 2px solid var(--navy);">
+                <td style="padding: 12px 4px 4px 4px; font-weight: 600; font-size: 1.1rem;">NET À PAYER</td>
+                <td style="padding: 12px 4px 4px 4px; text-align: right; font-size: 1.4rem; font-weight: 700; color: var(--navy);">
+                    {{ "%.2f"|format(bulletin.salaire_net_a_payer) }} MAD
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style="padding: 4px 4px 0 4px; text-align: right; font-size: 0.8rem; color: #999;">
+                    Généré le {{ bulletin.date_generation[:10] if bulletin.date_generation else 'date inconnue' }}
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+    
+    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap;">
+        <a href="{{ url_for('bulletin.pdf_mon_bulletin', id_bulletin=bulletin.id_bulletin) }}" 
+            class="btn btn-primary" target="_blank">
+            📄 Télécharger en PDF
+        </a>
+        <a href="{{ url_for('bulletin.mon_bulletin') }}" class="btn btn-primary">Retour à mes bulletins</a>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,140 @@
+<!-- templates/personnel/liste.html -->
+{% extends "base.html" %}
+{% block titre %}Personnel{% endblock %}
+{% block contenu %}
+
+<div class="page-header">
+    <div>
+        <h1>Personnel</h1>
+        <p class="sous-titre">Gestion des utilisateurs et employés (Super Admin)</p>
+    </div>
+    <a href="{{ url_for('personnel.nouveau_personnel') }}" class="btn btn-success">+ Nouveau</a>
+</div>
+
+<!-- Statistiques -->
+<div class="stats-mini">
+    <div class="stat-item">
+        <span class="stat-nb">{{ personnel|length }}</span>
+        <span class="stat-label">Total</span>
+    </div>
+    <div class="stat-item stat-actif">
+        <span class="stat-nb">{{ personnel|selectattr('utilisateur_actif', 'equalto', 1)|list|length }}</span>
+        <span class="stat-label">Actifs</span>
+    </div>
+    <div class="stat-item stat-inactif">
+        <span class="stat-nb">{{ personnel|selectattr('utilisateur_actif', 'equalto', 0)|list|length }}</span>
+        <span class="stat-label">Inactifs</span>
+    </div>
+</div>
+
+<!-- Filtres -->
+<div class="filtres-barre">
+    <form method="get" action="{{ url_for('personnel.liste_personnel') }}" class="form-filtres">
+        <div class="filtre-item">
+            <span class="filtre-label">Recherche :</span>
+            <input type="text" name="recherche" value="{{ filtre_recherche }}" 
+                   placeholder="Nom, email ou matricule...">
+        </div>
+        
+        <div class="filtre-item">
+            <span class="filtre-label">Rôle :</span>
+            <select name="role">
+                <option value="tous" {{ 'selected' if filtre_role == 'tous' else '' }}>Tous</option>
+                <option value="super_admin" {{ 'selected' if filtre_role == 'super_admin' else '' }}>Super Admin</option>
+                <option value="admin_societe" {{ 'selected' if filtre_role == 'admin_societe' else '' }}>Admin Société</option>
+                <option value="rh" {{ 'selected' if filtre_role == 'rh' else '' }}>RH</option>
+                <option value="comptable" {{ 'selected' if filtre_role == 'comptable' else '' }}>Comptable</option>
+                <option value="employe" {{ 'selected' if filtre_role == 'employe' else '' }}>Employé</option>
+            </select>
+        </div>
+        
+        <div class="filtre-item">
+            <span class="filtre-label">Statut :</span>
+            <select name="statut">
+                <option value="tous" {{ 'selected' if filtre_statut == 'tous' else '' }}>Tous</option>
+                <option value="actif" {{ 'selected' if filtre_statut == 'actif' else '' }}>Actifs</option>
+                <option value="inactif" {{ 'selected' if filtre_statut == 'inactif' else '' }}>Inactifs</option>
+            </select>
+        </div>
+        
+        <div class="filtre-item">
+            <span class="filtre-label">Société :</span>
+            <select name="societe">
+                <option value="tous" {{ 'selected' if filtre_societe == 'tous' else '' }}>Toutes</option>
+                {% for s in societes %}
+                <option value="{{ s.id_societe }}" {{ 'selected' if filtre_societe == s.id_societe|string else '' }}>
+                    {{ s.raison_sociale }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="filtre-actions">
+            <button type="submit" class="btn-filtre">Filtrer</button>
+            <a href="{{ url_for('personnel.liste_personnel') }}" class="btn-annuler">Réinitialiser</a>
+        </div>
+    </form>
+</div>
+
+<!-- Résultats -->
+<div class="card">
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Email</th>
+                    <th>Rôle</th>
+                    <th>Société</th>
+                    <th>Salaire de base</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in pagination.current_items %}
+                <tr class="ligne-personnel" data-role="{{ p.role }}" data-actif="{{ p.utilisateur_actif }}" data-societe="{{ p.raison_sociale or '' }}">
+                    <td>{{ p.prenom }} {{ p.nom }}</td>
+                    <td>{{ p.email }}</td>
+                    <td><span class="badge badge-societe">{{ p.role }}</span></td>
+                    <td>{{ p.raison_sociale if p.raison_sociale else '—' }}</td>
+                    <td>{{ p.salaire_base ~ ' MAD' if p.salaire_base else '—' }}</td>
+                    <td>
+                        <span class="badge badge-{{ 'active' if p.utilisateur_actif else 'inactive' }}">
+                            {{ 'Actif' if p.utilisateur_actif else 'Inactif' }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="actions">
+                            <a href="{{ url_for('personnel.modifier_personnel', id_utilisateur=p.id_utilisateur) }}" class="btn btn-petit btn-modifier">Modifier</a>
+                            ·
+                            <form method="post" action="{{ url_for('personnel.toggle_actif_personnel', id_utilisateur=p.id_utilisateur) }}" class="form-action-inline">
+                                <button type="submit" class="lien-bouton">{{ 'Désactiver' if p.utilisateur_actif else 'Activer' }}</button>
+                            </form>
+                            ·
+                            <form method="post" action="{{ url_for('personnel.supprimer_personnel', id_utilisateur=p.id_utilisateur) }}"
+                                  class="form-action-inline"
+                                  onsubmit="return confirm('Supprimer définitivement ce personnel ?');">
+                                <button type="submit" class="lien-bouton lien-danger">Supprimer</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" style="text-align:center;padding:30px;color:#999;">
+                        Aucun personnel trouvé.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ==========================================
+PAGINATION
+========================================== -->
+{% include "components/pagination.html" %}
+
+{% endblock %}

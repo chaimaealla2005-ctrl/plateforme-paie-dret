@@ -1,0 +1,278 @@
+{% extends "base.html" %}
+{% block titre %}Demander un congé{% endblock %}
+{% block contenu %}
+
+<div class="page-header">
+    <div>
+        <h1>Demander un congé</h1>
+        <p class="sous-titre">Formulaire de demande de congé</p>
+    </div>
+</div>
+
+<!-- Alerte si solde insuffisant (affichée uniquement si l'utilisateur a sélectionné CP) -->
+<div id="alerte-solde-insuffisant" style="display:none;" class="alert alert-danger">
+    <strong>❌ Vous n'avez plus de jours de congé restants.</strong>
+    <br>Solde actuel : <span id="solde-actuel">0</span> jours.
+</div>
+
+<div class="card">
+    <form method="post" enctype="multipart/form-data" id="form-conge">
+        <div class="form-group">
+            <label>Type de congé *</label>
+            <select name="id_type_conge" class="form-control" required id="type_conge" onchange="togglePieceJointe(); afficherSolde();">
+                <option value="">-- Sélectionner --</option>
+                {% for tc in types_conges %}
+                <option value="{{ tc.id_type_conge }}" 
+                        data-code="{{ tc.code }}" 
+                        data-solde="{{ tc.solde_restant|int }}"
+                        data-acquis="{{ tc.solde_acquis|int }}"
+                        data-pris="{{ tc.solde_pris|int }}">
+                    {{ tc.libelle }} ({{ tc.code }}) - Solde: {{ tc.solde_restant|int }} jours
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Affichage du solde -->
+        <div id="info-solde" style="display:none; padding:12px 16px; border-radius:6px; margin-bottom:12px; border-left:4px solid var(--blue);">
+            <div id="solde-message"></div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Date de début *</label>
+                <input type="date" name="date_debut" class="form-control" required 
+                       min="{{ today }}" id="date_debut" onchange="calculerJours()">
+            </div>
+            <div class="form-group">
+                <label>Date de fin *</label>
+                <input type="date" name="date_fin" class="form-control" required 
+                       min="{{ today }}" id="date_fin" onchange="calculerJours()">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Nombre de jours ouvrés</label>
+            <input type="number" id="nb_jours" class="form-control" readonly 
+                   style="background:#f7f8fa;font-weight:bold;">
+            <small style="color:#888;">Calculé automatiquement (lundi-vendredi)</small>
+        </div>
+
+        <!-- Pièce jointe -->
+        <div id="bloc-piece-jointe" style="display:none;">
+            <div class="form-group">
+                <label id="label-piece-jointe">Pièce jointe <span class="required">*</span></label>
+                <input type="file" name="piece_jointe" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.gif">
+                <small id="small-piece-jointe" style="color:#888;">
+                    Formats acceptés : PDF, JPG, PNG, GIF (max 5 Mo)
+                </small>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Motif <span class="required" id="motif-required" style="display:none;">*</span></label>
+            <textarea name="motif" class="form-control" rows="3" id="motif" placeholder="Précisez le motif de votre demande..."></textarea>
+            <small id="motif-help" style="color:#888;">Pour un congé exceptionnel, précisez le motif (mariage, naissance, décès, déménagement, mutation).</small>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-success" id="btn-submit">Envoyer la demande</button>
+            <a href="{{ url_for('conge.mes_conges') }}" class="btn btn-danger">Annuler</a>
+        </div>
+    </form>
+</div>
+
+<script>
+function calculerJours() {
+    var debut = document.getElementById('date_debut').value;
+    var fin = document.getElementById('date_fin').value;
+    
+    if (debut && fin) {
+        var d1 = new Date(debut);
+        var d2 = new Date(fin);
+        var jours = 0;
+        var current = new Date(d1);
+        
+        while (current <= d2) {
+            var day = current.getDay();
+            if (day >= 1 && day <= 5) {
+                jours++;
+            }
+            current.setDate(current.getDate() + 1);
+        }
+        
+        document.getElementById('nb_jours').value = jours;
+        
+        // Vérifier le solde
+        verifierSolde();
+    }
+}
+
+function afficherSolde() {
+    var select = document.getElementById('type_conge');
+    var selectedOption = select.options[select.selectedIndex];
+    var code = selectedOption.getAttribute('data-code');
+    var solde = parseInt(selectedOption.getAttribute('data-solde')) || 0;
+    var acquis = parseInt(selectedOption.getAttribute('data-acquis')) || 0;
+    var pris = parseInt(selectedOption.getAttribute('data-pris')) || 0;
+    var infoSolde = document.getElementById('info-solde');
+    var message = document.getElementById('solde-message');
+    var alerte = document.getElementById('alerte-solde-insuffisant');
+    var soldeActuel = document.getElementById('solde-actuel');
+    
+    // Masquer pour tous les types sauf CP
+    if (code === 'CP') {
+        infoSolde.style.display = 'block';
+        var soldeClass = solde <= 5 ? 'solde-faible' : 'solde-normal';
+        
+        // Afficher ou masquer l'alerte
+        if (solde <= 0) {
+            alerte.style.display = 'block';
+            soldeActuel.textContent = solde;
+        } else {
+            alerte.style.display = 'none';
+        }
+        
+        message.innerHTML = `
+            <div class="solde-detail">
+                <span class="solde-label">📊 Solde de congés payés :</span>
+                <span class="solde-valeur ${soldeClass}">
+                    <strong>${solde}</strong> jours restants
+                </span>
+                <div class="solde-detail-info">
+                    <small>Acquis : ${acquis} jours | Pris : ${pris} jours</small>
+                </div>
+                ${solde <= 5 && solde > 0 ? '<div class="solde-alerte">⚠️ Solde faible ! Pensez à planifier vos congés.</div>' : ''}
+                ${solde <= 0 ? '<div class="solde-alerte-rouge">❌ Vous n\'avez plus de jours de congé restants.</div>' : ''}
+            </div>
+        `;
+        // Mettre à jour la couleur de la bordure
+        infoSolde.style.borderLeftColor = solde <= 5 ? '#b03a2e' : '#2e5c8a';
+    } else {
+        infoSolde.style.display = 'none';
+        alerte.style.display = 'none';
+    }
+}
+
+function verifierSolde() {
+    var select = document.getElementById('type_conge');
+    var selectedOption = select.options[select.selectedIndex];
+    var code = selectedOption.getAttribute('data-code');
+    var solde = parseInt(selectedOption.getAttribute('data-solde')) || 0;
+    var nbJours = parseInt(document.getElementById('nb_jours').value) || 0;
+    var infoSolde = document.getElementById('info-solde');
+    var message = document.getElementById('solde-message');
+    var btnSubmit = document.getElementById('btn-submit');
+    
+    if (code === 'CP' && nbJours > 0) {
+        var reste = solde - nbJours;
+        if (reste < 0) {
+            message.innerHTML = `
+                <div class="solde-detail" style="color:#b03a2e;">
+                    <span class="solde-label">❌ Solde insuffisant !</span>
+                    <span class="solde-valeur">
+                        Il vous manque <strong>${Math.abs(reste)}</strong> jours.
+                        <br>Solde disponible : <strong>${solde}</strong> jours
+                    </span>
+                </div>
+            `;
+            infoSolde.style.borderLeftColor = '#b03a2e';
+            infoSolde.style.background = '#fce8ea';
+            btnSubmit.disabled = true;
+            btnSubmit.style.opacity = '0.6';
+            btnSubmit.style.cursor = 'not-allowed';
+        } else if (reste < 5) {
+            message.innerHTML = `
+                <div class="solde-detail" style="color:#b8860b;">
+                    <span class="solde-label">⚠️ Après cette demande, il vous restera</span>
+                    <span class="solde-valeur"><strong>${reste}</strong> jours</span>
+                    <div class="solde-detail-info">Solde actuel : ${solde} jours</div>
+                </div>
+            `;
+            infoSolde.style.borderLeftColor = '#b8860b';
+            infoSolde.style.background = '#fef3e2';
+            btnSubmit.disabled = false;
+            btnSubmit.style.opacity = '1';
+            btnSubmit.style.cursor = 'pointer';
+        } else {
+            afficherSolde();
+            btnSubmit.disabled = false;
+            btnSubmit.style.opacity = '1';
+            btnSubmit.style.cursor = 'pointer';
+        }
+    }
+}
+
+function togglePieceJointe() {
+    var select = document.getElementById('type_conge');
+    var selectedOption = select.options[select.selectedIndex];
+    var code = selectedOption.getAttribute('data-code');
+    var blocPieceJointe = document.getElementById('bloc-piece-jointe');
+    var labelPieceJointe = document.getElementById('label-piece-jointe');
+    var smallPieceJointe = document.getElementById('small-piece-jointe');
+    var motifRequired = document.getElementById('motif-required');
+    var motifHelp = document.getElementById('motif-help');
+    var motif = document.getElementById('motif');
+    
+    if (code === 'MALADIE') {
+        blocPieceJointe.style.display = 'block';
+        labelPieceJointe.textContent = 'Certificat médical *';
+        smallPieceJointe.textContent = 'Un certificat médical est obligatoire pour les congés maladie. Formats acceptés : PDF, JPG, PNG, GIF (max 5 Mo)';
+        motifRequired.style.display = 'none';
+        motifHelp.textContent = 'Précisez les détails de votre état de santé (facultatif)';
+        motif.removeAttribute('required');
+    } else if (code === 'EXCEPTIONNEL') {
+        blocPieceJointe.style.display = 'block';
+        labelPieceJointe.textContent = 'Pièce justificative *';
+        smallPieceJointe.textContent = 'Une pièce justificative est obligatoire pour les congés exceptionnels (acte de mariage, acte de naissance, certificat de décès...). Formats acceptés : PDF, JPG, PNG, GIF (max 5 Mo)';
+        motifRequired.style.display = 'inline';
+        motifHelp.textContent = 'Précisez le motif (mariage, naissance, décès, déménagement, mutation)';
+        motif.setAttribute('required', 'required');
+    } else {
+        blocPieceJointe.style.display = 'none';
+        motifRequired.style.display = 'none';
+        motifHelp.textContent = 'Précisez le motif de votre demande (facultatif)';
+        motif.removeAttribute('required');
+    }
+    afficherSolde();
+}
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    // Définir la date minimale pour les champs date
+    var today = new Date().toISOString().split('T')[0];
+    var dateDebut = document.getElementById('date_debut');
+    var dateFin = document.getElementById('date_fin');
+    if (dateDebut) dateDebut.min = today;
+    if (dateFin) dateFin.min = today;
+});
+</script>
+
+<style>
+.solde-alerte {
+    color: #b8860b;
+    font-weight: 500;
+    font-size: 12px;
+    margin-top: 4px;
+    padding: 4px 8px;
+    background: #fef3e2;
+    border-radius: 4px;
+}
+
+.solde-alerte-rouge {
+    color: #b03a2e;
+    font-weight: 500;
+    font-size: 12px;
+    margin-top: 4px;
+    padding: 4px 8px;
+    background: #fce8ea;
+    border-radius: 4px;
+}
+
+#btn-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+</style>
+
+{% endblock %}

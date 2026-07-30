@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block titre %}Employés{% endblock %}
+{% block contenu %}
+
+<div class="page-header">
+    <div>
+        <h1>Employés</h1>
+        <p class="sous-titre">Gestion du personnel</p>
+    </div>
+    {% if session.role in ['rh', 'admin_societe', 'super_admin'] %}
+    <a class="btn" href="{{ url_for('employe.nouvel_employe') }}">+ Nouvel employé</a>
+    {% endif %}
+</div>
+
+<!-- Statistiques -->
+<div class="stats-mini">
+    <div class="stat-item">
+        <span class="stat-nb">{{ total_employes }}</span>
+        <span class="stat-label">Total</span>
+    </div>
+    <div class="stat-item stat-actif">
+        <span class="stat-nb">{{ total_actifs }}</span>
+        <span class="stat-label">Actifs</span>
+    </div>
+    <div class="stat-item stat-inactif">
+        <span class="stat-nb">{{ total_inactifs }}</span>
+        <span class="stat-label">Inactifs</span>
+    </div>
+</div>
+
+<!-- Filtres -->
+<div class="filtres-barre">
+    <form method="get" action="{{ url_for('employe.liste_employes') }}" class="form-filtres">
+        <div class="filtre-item">
+            <span class="filtre-label">Recherche :</span>
+            <input type="text" name="recherche" value="{{ filtre_recherche }}" 
+                   placeholder="Nom, prénom ou matricule...">
+        </div>
+        
+        <div class="filtre-item">
+            <span class="filtre-label">Statut :</span>
+            <select name="statut">
+                <option value="tous" {{ 'selected' if filtre_statut == 'tous' else '' }}>Tous</option>
+                <option value="actif" {{ 'selected' if filtre_statut == 'actif' else '' }}>Actifs</option>
+                <option value="inactif" {{ 'selected' if filtre_statut == 'inactif' else '' }}>Inactifs</option>
+            </select>
+        </div>
+        
+        <div class="filtre-item">
+            <span class="filtre-label">Poste :</span>
+            <select name="poste">
+                <option value="tous" {{ 'selected' if filtre_poste == 'tous' else '' }}>Tous</option>
+                {% for p in postes %}
+                <option value="{{ p.poste }}" {{ 'selected' if filtre_poste == p.poste else '' }}>
+                    {{ p.poste }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="filtre-actions">
+            <button type="submit" class="btn-filtre">Filtrer</button>
+            <a href="{{ url_for('employe.liste_employes') }}" class="btn-annuler">Réinitialiser</a>
+        </div>
+    </form>
+</div>
+
+<!-- Résultats -->
+<div class="card">
+    <div class="table-wrapper">
+        <!-- Avant le tableau ou après le tableau -->
+        {% include "components/pagination.html" %}
+        <table>
+            <thead>
+                <tr>
+                    {% if session.role == 'super_admin' %}<th>Société</th>{% endif %}
+                    <th>Matricule</th>
+                    <th>Nom</th>
+                    <th>Poste</th>
+                    <th>Email</th>
+                    <th>Salaire de base</th>
+                    <th>Statut</th>
+                    <th>Bulletin</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for e in employes %}
+                <tr>
+                    {% if session.role == 'super_admin' %}<td>{{ e.raison_sociale }}</td>{% endif %}
+                    <td>{{ e.matricule }}</td>
+                    <td>{{ e.prenom }} {{ e.nom }}</td>
+                    <td>{{ e.poste if e.poste else '-' }}</td>
+                    <td>{{ e.email if e.email else '-' }}</td>
+                    <td>{{ e.salaire_base }} MAD</td>
+                    <td>
+                        <span class="badge badge-{{ 'active' if e.actif else 'inactive' }}">
+                            {{ 'Actif' if e.actif else 'Inactif' }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if session.role in ['comptable', 'admin_societe'] and e.actif %}
+                        <a href="{{ url_for('bulletin.generer_bulletin', id_employe=e.id_employe) }}" class="btn btn-petit btn-modifier">Générer</a>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="actions">
+                            {% if session.role in ['rh', 'admin_societe', 'super_admin', 'comptable'] %}
+                            <a href="{{ url_for('employe.modifier_employe', id_employe=e.id_employe) }}" class="btn btn-petit btn-modifier">Modifier</a>
+                            ·
+                            <form method="post" action="{{ url_for('employe.toggle_actif_employe', id_employe=e.id_employe) }}" class="form-action-inline">
+                                <button type="submit" class="lien-bouton">{{ 'Désactiver' if e.actif else 'Activer' }}</button>
+                            </form>
+                            {% endif %}
+                            {% if session.role in ['admin_societe', 'super_admin'] %}
+                            ·
+                            <form method="post" action="{{ url_for('employe.supprimer_employe', id_employe=e.id_employe) }}"
+                                  class="form-action-inline"
+                                  onsubmit="return confirm('Supprimer définitivement cet employé ?');">
+                                <button type="submit" class="lien-bouton lien-danger">Supprimer</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="{{ 9 if session.role == 'super_admin' else 8 }}" style="text-align:center;padding:30px;color:#999;">
+                        Aucun employé trouvé.
+                        {% if filtre_recherche or filtre_statut != 'tous' or filtre_poste != 'tous' %}
+                            <br><small>Essayez de modifier vos filtres.</small>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="page-header">
+    <div>
+        <h1>Employés</h1>
+        <p class="sous-titre">Gestion du personnel</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('employe.nouvel_employe') }}" class="btn btn-success">+ Nouvel employé</a>
+        <div class="dropdown">
+            <button class="btn btn-info dropdown-toggle">📊 Exporter</button>
+            <div class="dropdown-content">
+                <a href="{{ url_for('employe.export_employes_csv', format='csv') }}">CSV</a>
+                <a href="{{ url_for('employe.export_employes_csv', format='excel') }}">Excel</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Actions rapides -->
+<div class="card">
+    <div class="card-header">
+        <h2>Actions rapides</h2>
+    </div>
+    <div class="actions-rapides">
+        <a href="{{ url_for('employe.nouvel_employe') }}" class="btn btn-success">+ Nouvel employé</a>
+        {% if session.role == 'super_admin' %}
+        <a href="{{ url_for('employe.fix_anciennete') }}" class="btn btn-warning" 
+           onclick="return confirm('Affecter la prime d\'ancienneté à tous les employés qui n\'en ont pas ?')">
+           🔧 Corriger les primes d'ancienneté
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
