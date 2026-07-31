@@ -476,7 +476,7 @@ def profil():
 # MODIFICATION DU PROFIL (EMAIL ET TELEPHONE UNIQUEMENT)
 # ============================================================
 @employe_bp.route("/profil/modifier", methods=["GET", "POST"])
-@role_requis("employe", "rh", "comptable")
+@role_requis("employe", "rh", "comptable", "admin_societe", "super_admin")
 def modifier_profil():
     """Modifier certaines informations personnelles (email, téléphone)"""
     db = get_db()

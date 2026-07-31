@@ -434,7 +434,7 @@ def mon_bulletin():
 # DETAIL D'UN BULLETIN (Employé)
 # ============================================================
 @bulletin_bp.route("/mon-bulletin/<int:id_bulletin>")
-@role_requis("employe", "comptable", "rh")
+@role_requis("employe", "comptable", "rh", "admin_societe")
 def mon_bulletin_detail(id_bulletin):
     db = get_db()
     

@@ -61,7 +61,7 @@ def calculer_anciennete(date_embauche_str):
 # ============================================================
 @conge_bp.route("/")
 @conge_bp.route("/mes-conges")
-@role_requis("employe", "rh", "comptable")
+@role_requis("employe", "rh", "comptable", "admin_societe")
 def mes_conges():
     db = get_db()
     
@@ -179,7 +179,7 @@ def mes_conges():
 # DEMANDER UN CONGE (AVEC PIECE JOINTE)
 # ============================================================
 @conge_bp.route("/demander", methods=["GET", "POST"])
-@role_requis("employe", "comptable", "rh")
+@role_requis("employe", "comptable", "rh", "admin_societe")
 def demander_conge():
     db = get_db()
     
@@ -381,7 +381,7 @@ def demander_conge():
 # ANNULER UNE DEMANDE DE CONGE (EMPLOYE)
 # ============================================================
 @conge_bp.route("/annuler/<int:id_conge>", methods=["POST"])
-@role_requis("employe", "rh", "comptable")
+@role_requis("employe", "rh", "comptable", "admin_societe")
 def annuler_conge(id_conge):
     db = get_db()
     

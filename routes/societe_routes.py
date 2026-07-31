@@ -325,7 +325,7 @@ def supprimer_societe(id_societe):
     db.execute("DELETE FROM societe WHERE id_societe = ?", (id_societe,))
     db.commit()
 
-    enregistrar_action(db, "suppression_societe", f"Société {societe['raison_sociale']} supprimée définitivement (id={id_societe})")
+    enregistrer_action(db, "suppression_societe", f"Société {societe['raison_sociale']} supprimée définitivement (id={id_societe})")
     flash("Société et toutes ses données ont été supprimées définitivement.", "success")
     return redirect(url_for("societe.liste_societes"))
 
